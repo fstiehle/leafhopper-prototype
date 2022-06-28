@@ -20,15 +20,14 @@ describe('SupplyChainEnactment Contract', () => {
     supplyChainEnactment = (await deployContract(owner, SupplyChainEnactmentArtifact)) as SupplyChainEnactment;
   });
 
-  describe('Test conforming traces', () => {
-    supplyChainTraces.conforming.forEach(trace => {
-      it("replay conforming log", async () => {
-        let tx;
-        for (const event of trace) {
-          tx = await supplyChainEnactment.connect(addr1).begin(event, "0xFF");
-        }
-        expect(tx).to.emit(supplyChainEnactment, "EndEvent")
-      });
+  supplyChainTraces.conforming.forEach(trace => {
+    it(`replay conforming trace: [${trace}]`, async () => {
+      let tx;
+      for (const event of trace) {
+        tx = await supplyChainEnactment.connect(addr1).begin(event, "0xFF");
+        expect(tx).to.not.emit(supplyChainEnactment, "NonConformingTrace")
+      }
+      expect(tx).to.emit(supplyChainEnactment, "EndEvent")
     });
   });
 });

@@ -24,7 +24,7 @@ contract SupplyChainEnactment {
     /// @param id id of the activity to begin
     /// @return return true on success, false for non-conforming behaviour 
     function step(uint id) private returns (bool) {
-        if (id == 2 || id == 4 || id == 6 || id > 13) {
+        if (id == 2 || id == 4 || id == 6 || id > 12) {
             // only used for internal orchestration
             return false;
         }

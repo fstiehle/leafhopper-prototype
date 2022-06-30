@@ -1,6 +1,5 @@
 import { Express, Request, Response, NextFunction } from 'express';
 import conformance from '../services/conformance.service';
-import controlFlow from '../services/controlFlow.service';
 
 /**
  * 
@@ -17,21 +16,17 @@ import controlFlow from '../services/controlFlow.service';
  */
 
 /**
- * 
+ * Receives new token state from other participant and task to invoke 
+ * Check if task to invoke leads to new token state that was sent
  * @param req 
  * @param res 
  * @param next 
  */
-const begin = (req: Request, res: Response, next: NextFunction) => {
-  const taskID = parseInt(req.params.id);
-  if (!conformance.check(taskID, req.params.user)) {
-    res.statusCode = 406;
-    res.statusMessage = "Non conforming behaviour."
-    return res.send();
-  }
-  // routing
-  controlFlow.callNextParticipant(taskID, conformance.tokenState);
+// TODO: Parse tokenState from JSON bod
+const step = (req: Request, res: Response, next: NextFunction) => {
+  // TODO: verif signature chain
+  conformance.check(parseInt(req.params.id), req.params.user);
   next();
 }
 
-export default begin;
+export default step;

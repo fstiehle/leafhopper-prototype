@@ -48,4 +48,4 @@ export default class SupplyChainConformance implements ConformanceCheck {
     
     return true;
   }
-}
+};

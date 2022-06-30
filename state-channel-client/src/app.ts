@@ -7,6 +7,7 @@ const app: Express = express();
 
 app.use(helmet());
 app.use('/begin', beginRouter);
+app.use('/step', beginRouter);
 
 app.get('/', (req: Request, res: Response) => {
   res.sendStatus(200);

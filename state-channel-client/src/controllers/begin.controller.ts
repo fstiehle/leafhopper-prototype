@@ -1,4 +1,5 @@
-import{ Express, Request, Response, NextFunction } from 'express';
+import { Express, Request, Response, NextFunction } from 'express';
+import step from '../services/step.service';
 
 /**
  * 
@@ -15,7 +16,8 @@ import{ Express, Request, Response, NextFunction } from 'express';
  */
 
 const begin = (req: Request, res: Response, next: NextFunction) => {
-    next();
+  step(req.params.user, parseInt(req.params.id));
+  next();
 }
 
 export default begin;

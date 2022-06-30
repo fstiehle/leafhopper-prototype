@@ -9,7 +9,7 @@ app.use(helmet());
 app.use('/begin', beginRouter);
 
 app.get('/', (req: Request, res: Response) => {
-    res.sendStatus(200);
+  res.sendStatus(200);
 });
 
 app.listen(PORT, () => console.log(`Running on ${PORT} ⚡`));

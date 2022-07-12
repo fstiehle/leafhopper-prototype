@@ -1,21 +1,22 @@
 import { throws } from "assert";
 import { Participants, RoutingInformation } from "./RoutingInformation";
 
-class Step {
+interface StepProperties {
   caseID: number;
   taskID: number;
-  newTokenState: Array<number>;
+  salt: string;
+  signature: string;
+}
+
+class Step implements StepProperties{
+  caseID: number;
+  taskID: number;
   salt: string;
   signature: string; // TODO
 
-  constructor(caseID: number, taskID: number, 
-    newTokenState: Array<number>, salt: string, signature: string) {
-      this.caseID = caseID;
-      this.taskID = taskID;
-      this.newTokenState = newTokenState;
-      this.salt = salt;
-      this.signature = signature;
-    }
+  constructor(props: StepProperties) {
+    Object.assign(this, props);
+  }
 }
 
 interface ConformanceCheck {
@@ -24,7 +25,7 @@ interface ConformanceCheck {
   tokenState: Array<number>;
   routing: RoutingInformation[];
 
-  check(step: Step, previousSteps: Step[]): boolean
+  step(step: Step, previousSteps: Step[]): boolean
 }
 
 export {

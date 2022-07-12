@@ -1,6 +1,6 @@
 import { Express, Request, Response, NextFunction } from 'express';
 import { ConformanceCheck } from '../services/ConformanceCheck';
-import { Participants } from '../services/RoutingInformation';
+import Participant from "../services/Participant";
 
 /**
  * 

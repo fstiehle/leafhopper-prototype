@@ -1,5 +1,7 @@
-import { ConformanceCheck, Step } from "./conformanceCheck";
-import { RoutingInformation } from "./RoutingInformation";
+import { ConformanceCheck } from "./conformanceCheck";
+import Step from "./Step";
+import RoutingInformation from "./RoutingInformation";
+import crypto from "crypto";
 
 /// TODO: Refactor general function into a super class
 export default class SupplyChainConformance implements ConformanceCheck {
@@ -79,7 +81,10 @@ export default class SupplyChainConformance implements ConformanceCheck {
           // Check and replay them
           if (this.checkStep(prevSteps[index])) {
             this.steps[index] = prevSteps[index];
-            this.tokenState = this.task(this.tokenState, prevSteps[index].taskID);
+            this.tokenState = this.task(
+              this.tokenState, 
+              prevSteps[index].taskID
+            );
           } else {
             // Rollback
             console.log(`Rollback because of ${prevSteps[index]}`);
@@ -93,7 +98,10 @@ export default class SupplyChainConformance implements ConformanceCheck {
 
       console.log(`Known step with task id ${this.steps[index].taskID}`);
       // Do not need to verify already known steps indepth, just check our known is equal to their known
-      if (prevSteps[index] !== undefined && (JSON.stringify(prevSteps[index]) !== JSON.stringify(this.steps[index]))) {
+      if (
+        prevSteps[index] !== undefined && 
+        (JSON.stringify(prevSteps[index]) !== JSON.stringify(this.steps[index]))
+      ) {
         return false;
       }
     }
@@ -109,12 +117,24 @@ export default class SupplyChainConformance implements ConformanceCheck {
     return false;
   }
 
-  /// TODO: signature check
   checkStep(step: Step): boolean {
     if (step.caseID !== this.caseID) {
       return false;
     }
-    console.log(`checkStep(): ${JSON.stringify([...this.tokenState])} === ${JSON.stringify(this.task([...this.tokenState], step.taskID))}`);
-    return !(JSON.stringify([...this.tokenState]) === JSON.stringify(this.task([...this.tokenState], step.taskID)));
+    if (!step.verifySignature) {
+      return;
+    }
+    // TODO: is it actually his turn? checkRouting
+
+    if (
+      JSON.stringify([...this.tokenState]) !== JSON.stringify(this.task(
+        [...this.tokenState], 
+        step.taskID
+      ))
+    ) { 
+      return true; 
+    }
+
+    return false;
   }
 }

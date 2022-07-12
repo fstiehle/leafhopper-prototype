@@ -1,6 +1,5 @@
-
 import http from 'http';
-import { RoutingInformation } from '../services/RoutingInformation';
+import RoutingInformation from '../services/RoutingInformation';
 
 /**
  * Modified from: https://stackoverflow.com/a/56122489

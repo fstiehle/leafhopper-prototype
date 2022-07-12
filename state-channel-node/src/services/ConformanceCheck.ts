@@ -1,23 +1,5 @@
-import { throws } from "assert";
-import { Participants, RoutingInformation } from "./RoutingInformation";
-
-interface StepProperties {
-  caseID: number;
-  taskID: number;
-  salt: string;
-  signature: string;
-}
-
-class Step implements StepProperties{
-  caseID: number;
-  taskID: number;
-  salt: string;
-  signature: string; // TODO
-
-  constructor(props: StepProperties) {
-    Object.assign(this, props);
-  }
-}
+import RoutingInformation from "./RoutingInformation";
+import Step from "./Step";
 
 interface ConformanceCheck {
   caseID: number;

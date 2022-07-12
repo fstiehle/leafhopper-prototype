@@ -1,19 +1,14 @@
-enum Participants {
-  BulkBuyer,
-  Manufacturer,
-  Middleman,
-  Supplier,
-  SpecialCarrier
-}
+import Participant from "./Participant";
 
-class RoutingInformation {
-  participant: Participants
+export default class RoutingInformation {
+  participant: Participant
   hostname: string;
   port: number;
+  pubKey: string;
   path = "/step";
-  method= 'POST';
+  method = 'POST';
 
-  constructor(participant: Participants, 
+  constructor(participant: Participant, 
     host: string, port: number, path = "/step", method = 'POST') {
       this.participant = participant;
       this.hostname = host;
@@ -22,8 +17,3 @@ class RoutingInformation {
       this.method = method;
   }
 }
-
-export {
-  RoutingInformation,
-  Participants
-};

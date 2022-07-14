@@ -5,7 +5,7 @@ import SupplyChainConformance from '../src/classes/SupplyChainConformance';
 import Participant from "../src/classes/Participant";
 import RoutingInformation from '../src/classes/RoutingInformation';
 import Step from "../src/classes/Step";
-import crypto, { sign } from "crypto";
+import crypto from "crypto";
 import traces from './traces/supplyChain.json'
 const {expect} = chai;
 
@@ -17,6 +17,7 @@ const participants = new Map<Participant, RoutingInformation>([
   [Participant.SpecialCarrier, new RoutingInformation(Participant.SpecialCarrier, 'localhost', 9005)],
 ]);
 
+const pubKeys = new Map<Participant, string>();
 const keys =  new Map<Participant, [string, string]>();
 for (const [participant, routingInformation] of participants) {
   const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
@@ -30,14 +31,15 @@ for (const [participant, routingInformation] of participants) {
       type: 'pkcs8',
       format: 'pem',
       cipher: 'aes-256-cbc',
-      passphrase: 'test environment ' + participant
+      passphrase: 'test'
     }
   });
   routingInformation.pubKey = publicKey;
   keys.set(participant, [publicKey, privateKey]);
+  pubKeys.set(participant, publicKey)
 }
 
-const getNewConformanceService = (participants: Map<Participant, RoutingInformation>) => {
+const getNewConformanceService = (participants: Map<Participant, string>) => {
   return new SupplyChainConformance(participants);
 }
 
@@ -48,7 +50,7 @@ const getNewStep = (from: Participant, taskID: number) => {
     caseID: 0
   });
   const [_, privateKey] = keys.get(from);
-  step.sign(privateKey)
+  step.sign(privateKey, 'test')
   return step;
 }
 
@@ -56,25 +58,25 @@ describe('Dry test conformance check functions', () => {
   let conformance: SupplyChainConformance;
 
   beforeEach(() => {
-    conformance = getNewConformanceService(participants);
+    conformance = getNewConformanceService(pubKeys);
   });
 
   it('test conforming steps, where the middleman sends the message first to the supplier', (done) => {
     let nextStep = getNewStep(Participant.BulkBuyer, 0);
-    const manufacturer = getNewConformanceService(participants);
+    const manufacturer = getNewConformanceService(pubKeys);
     // Bulk Buyer to Manufacturer
     expect(manufacturer.checkStep(nextStep), "test checkStep").to.be.true
     expect(manufacturer.step(nextStep, []), "0: Bulk Buyer to Manufacturer").to.be.true;
 
     // Manufacturer to Middleman
     nextStep = getNewStep(Participant.Manufacturer, 1);
-    const middleman = getNewConformanceService(participants);
+    const middleman = getNewConformanceService(pubKeys);
     expect(middleman.step(nextStep, manufacturer.steps), "1: Manufacturer to Middleman").to.be.true;
 
     // Middleman to Supplier
     nextStep = getNewStep(Participant.Middleman, 3);
 
-    const supplier = getNewConformanceService(participants);
+    const supplier = getNewConformanceService(pubKeys);
     expect(supplier.step(nextStep, middleman.steps), "3: Middleman to Supplier").to.be.true;
 
     // Middleman has to wait for his ack so the step can be added before 
@@ -82,7 +84,7 @@ describe('Dry test conformance check functions', () => {
     // Middleman to Special Carrier
     nextStep = getNewStep(Participant.Middleman, 5);
 
-    const specialCarrier = getNewConformanceService(participants);
+    const specialCarrier = getNewConformanceService(pubKeys);
     expect(specialCarrier.step(nextStep, middleman.steps), "5: Middleman to Special Carrier").to.be.true;
 
     // SpecialCarrier to Supplier
@@ -94,24 +96,24 @@ describe('Dry test conformance check functions', () => {
 
   it('test conforming steps, where the middleman sends the message first to the special carrier', (done) => {
     let nextStep = getNewStep(Participant.BulkBuyer, 0);
-    const manufacturer = getNewConformanceService(participants);
+    const manufacturer = getNewConformanceService(pubKeys);
     // Bulk Buyer to Manufacturer
     expect(manufacturer.checkStep(nextStep), "test checkStep").to.be.true
     expect(manufacturer.step(nextStep, []), "0: Bulk Buyer to Manufacturer").to.be.true;
 
     // Manufacturer to Middleman
     nextStep = getNewStep(Participant.Manufacturer, 1);
-    const middleman = getNewConformanceService(participants);
+    const middleman = getNewConformanceService(pubKeys);
     expect(middleman.step(nextStep, manufacturer.steps), "1: Manufacturer to Middleman").to.be.true;
 
     // Middleman to Special Carrier
     nextStep = getNewStep(Participant.Middleman, 5);
-    const specialCarrier = getNewConformanceService(participants);
+    const specialCarrier = getNewConformanceService(pubKeys);
     expect(specialCarrier.step(nextStep, middleman.steps), "5: Middleman to Special Carrier").to.be.true;
 
     // Middleman to Supplier
     nextStep = getNewStep(Participant.Middleman, 3);
-    const supplier = getNewConformanceService(participants);
+    const supplier = getNewConformanceService(pubKeys);
     expect(supplier.step(nextStep, middleman.steps), "3: Middleman to Supplier").to.be.true;
 
     // SpecialCarrier to Supplier
@@ -128,25 +130,25 @@ describe('Dry test conformance check functions', () => {
 
   it('test non-conforming steps, where the supplier or the special carrier try to hide their involvement', (done) => {
     let nextStep = getNewStep(Participant.BulkBuyer, 0);
-    const manufacturer = getNewConformanceService(participants);
+    const manufacturer = getNewConformanceService(pubKeys);
     // Bulk Buyer to Manufacturer
     expect(manufacturer.checkStep(nextStep), "test checkStep").to.be.true
     expect(manufacturer.step(nextStep, []), "0: Bulk Buyer to Manufacturer").to.be.true;
 
     // Manufacturer to Middleman
     nextStep = getNewStep(Participant.Manufacturer, 1);
-    const middleman = getNewConformanceService(participants);
+    const middleman = getNewConformanceService(pubKeys);
     expect(middleman.step(nextStep, manufacturer.steps), "1: Manufacturer to Middleman").to.be.true;
 
     // Middleman to Special Carrier
     nextStep = getNewStep(Participant.Middleman, 5);
 
-    const specialCarrier = getNewConformanceService(participants);
+    const specialCarrier = getNewConformanceService(pubKeys);
     expect(specialCarrier.step(nextStep, middleman.steps), "5: Middleman to Special Carrier").to.be.true;
 
     // Middleman to Supplier
     nextStep = getNewStep(Participant.Middleman, 3);
-    const supplier = getNewConformanceService(participants);
+    const supplier = getNewConformanceService(pubKeys);
     expect(supplier.step(nextStep, middleman.steps), "3: Middleman to Supplier").to.be.true;
 
     // SpecialCarrier to Supplier
@@ -164,7 +166,7 @@ describe('Dry test conformance check functions', () => {
     done();
   });
 
-  it('test conforming traces', (done) => {
+  it('test token game by replaying conforming traces', (done) => {
     for (const trace of traces.conforming) {
       const tokenState: number[] = [...conformance.tokenState];
       for (const taskID of trace) {

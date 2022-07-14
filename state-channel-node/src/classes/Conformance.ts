@@ -6,7 +6,7 @@ export default interface Conformance {
   caseID: number;
   steps: Step[];
   tokenState: Array<number>;
-  routing: Map<Participant, RoutingInformation>;
+  pubKeys: Map<Participant, string>;
 
   step(step: Step, previousSteps: Step[]): boolean
 }

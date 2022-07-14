@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import ConformanceCheck from '../classes/ConformanceCheck';
+import Step from '../classes/Step';
+import ConformanceCheck from '../classes/Conformance';
 import Identity from '../classes/Identity';
-import StepJSONPayload from '../classes/StepJSONPayload';
+import StepMessage from '../classes/StepMessage';
 
 /**
  * 
@@ -27,24 +28,27 @@ import StepJSONPayload from '../classes/StepJSONPayload';
 /**
  * Receives new token state from other participant and task to invoke 
  * Check if task to invoke leads to new token state that was sent
- * @param req 
- * @param res 
- * @param next 
  */
 const step = (identity: Identity, conformance: ConformanceCheck) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    let payload: StepJSONPayload;
-    try {
-      payload = JSON.parse(req.body);
-    } catch (err) {
-      res.status(403).send(err);
+    const stepMessage = new StepMessage().fromJSON(req.body);
+
+    if (!stepMessage?.step || !stepMessage?.prevSteps) {
+      console.error(`Malformed JSON: ${JSON.stringify(req.body)} to ${JSON.stringify(stepMessage)}`);
+      res.status(400).send("Malformed JSON");
       return next();
     }
 
-    // Check if certificate equals step.from
-    // TODO: Send signed ACK or error back
-    console.log(conformance.step(payload.step, payload.prevSteps));
-    res.sendStatus(200);
+    // TODO: Check if certificate equals step.from
+    // Send signed ACK or error back
+    if (!conformance.step(stepMessage.step, stepMessage.prevSteps)) {
+      res.status(403).send("Non-conforming behaviour");
+      return next();
+    }
+
+    stepMessage.sign(identity.privateKey, 'test');
+    res.status(200).send(JSON.stringify(stepMessage))
+    return next();
   }
 }
 

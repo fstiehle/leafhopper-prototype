@@ -1,53 +1,40 @@
-import * as dotenv from 'dotenv'
-import express, { Express, Request, Response, NextFunction } from 'express';
-import helmet from 'helmet';
-import beginRouter from './routes/begin.route';
-import stepRouter from './routes/step.route';
+import * as dotenv from 'dotenv';
+import fs from 'fs';
+import express, { Express } from 'express';
 import SupplyChainConformance from './classes/SupplyChainConformance';
-import RoutingInformation from './classes/RoutingInformation';
 import Participant from "./classes/Participant";
-import Identity from './classes/Identity';
+import SupplyChainRouting from './classes/SupplyChainRouting';
+import { getSupplyChainParticipants, configureServer } from './helpers/util';
 
-const configureServer = (app: Express, identity: Identity) => {
-  
-  const conformance = new SupplyChainConformance(new Map<Participant, RoutingInformation>([
-    [Participant.BulkBuyer, new RoutingInformation(Participant.BulkBuyer, 'localhost', 9001)],
-    [Participant.Manufacturer, new RoutingInformation(Participant.Manufacturer, 'localhost', 9002)],
-    [Participant.Middleman, new RoutingInformation(Participant.Middleman, 'localhost', 9003)],
-    [Participant.Supplier, new RoutingInformation(Participant.Supplier, 'localhost', 9004)],
-    [Participant.SpecialCarrier, new RoutingInformation(Participant.SpecialCarrier, 'localhost', 9005)],
-  ]));
+dotenv.config()
+const port = 9000;
+const identity = dotenv.parse("IDENTITY").identity;
+let pK: string;
+let sK: string;
 
-  const router = express.Router();
-  app.use(helmet());
-  app.use(express.json());
-  app.use('/begin', beginRouter(router, identity, conformance));
-  app.use('/step', stepRouter(router, identity, conformance));
-
-  app.use((error: Error, request: Request, response: Response, next: NextFunction) => {
-    const message = error.message || 'Something went wrong';
-    console.log('error', message);
-    response
-      .status(500)
-      .send(message);
-  });
-  
-  app.get('/', (req: Request, res: Response) => {
-    res.sendStatus(200);
-  });
-
-  return app;
+try {
+  pK = fs.readFileSync('../rsa_id/' + identity + '.pub').toString();
+  sK = fs.readFileSync('../rsa_id/' + identity).toString();
+  console.log(pK);
+  console.log(sK);
+} catch (err) {
+  console.error(err);
 }
 
-dotenv.config() // TODO
-const PORT = 9000;
-const app: Express = configureServer(express(), {
-  me: Participant.BulkBuyer,
-  publicKey: "",
-  privateKey: ""
-});
+const {participants, keys} = getSupplyChainParticipants();
 
-app.listen(PORT, () => console.log(`Running on ${PORT} ⚡`));
+const app: Express = configureServer(
+  express(), 
+  {
+    me: Participant[identity as keyof typeof Participant],
+    publicKey: pK,
+    privateKey: sK
+  },
+  new SupplyChainRouting(participants),
+  new SupplyChainConformance(keys),
+);
+
+app.listen(port, () => console.log(`Running on ${port} ⚡`));
 
 export {
   configureServer

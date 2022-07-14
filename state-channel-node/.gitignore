@@ -1,3 +1,6 @@
+rsa_id_*
+*.env
+
 # From https://github.com/geshan/expressjs-structure/blob/master/.gitignore
 # Logs
 logs

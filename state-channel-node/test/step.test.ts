@@ -20,7 +20,7 @@ describe('Dry test signature functions', () => {
         type: 'pkcs8',
         format: 'pem',
         cipher: 'aes-256-cbc',
-        passphrase: 'test environment ' + Participant.BulkBuyer
+        passphrase: 'test'
       }
     });
 
@@ -29,7 +29,7 @@ describe('Dry test signature functions', () => {
       caseID: 0,
       taskID: 0
     })
-    step.sign(privateKey)
+    step.sign(privateKey, 'test');
     expect(step.verifySignature(publicKey), "verify signature...").to.be.true
 
     done();

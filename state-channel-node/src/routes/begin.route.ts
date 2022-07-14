@@ -1,10 +1,16 @@
 import { Router } from 'express';
 import Identity from '../classes/Identity';
-import ConformanceCheck from '../classes/ConformanceCheck';
+import ConformanceCheck from '../classes/Conformance';
 import controller from '../controllers/begin.controller';
+import Routing from '../classes/Routing';
 
-const begin = (router: Router, identity: Identity, conformance: ConformanceCheck): Router => {
-  router.get('/:id([0-9]+)', controller(identity, conformance));
+const begin = (
+  router: Router, 
+  identity: Identity, 
+  conformance: ConformanceCheck,
+  flow: Routing
+  ): Router => {
+  router.get('/:id([0-9]+)', controller(identity, conformance, flow));
   return router;
 }
 

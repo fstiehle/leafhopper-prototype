@@ -1,8 +1,10 @@
-import { Express, Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import ConformanceCheck from '../classes/Conformance';
 import { doRequest } from '../helpers/util';
 import Step from '../classes/Step';
 import Identity from '../classes/Identity';
+import Routing from '../classes/Routing';
+import StepMessage, { StepMessageProperties } from '../classes/StepMessage';
 
 /**
  * 
@@ -24,7 +26,7 @@ import Identity from '../classes/Identity';
  * @param res 
  * @param next 
  */
-const begin = (identity: Identity, conformance: ConformanceCheck) => {
+const begin = (identity: Identity, conformance: ConformanceCheck, routing: Routing) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const taskID = parseInt(req.params.id);
     //if (!conformance.check(taskID, req.params.user)) {
@@ -36,23 +38,43 @@ const begin = (identity: Identity, conformance: ConformanceCheck) => {
       caseID: 0,
       taskID: taskID
     })
-    .sign(identity.privateKey);
-
+    .sign(identity.privateKey, 'test');
+    const receiver = routing.next(taskID);
     const options = {
       headers: {
         'Content-Type': 'application/json',
       },
-      ...conformance.routing.get(identity.me)
+      ...routing.get(receiver)
     }
-    options.path = `${options.path}/${taskID}`;
     await doRequest(
       options,
-      JSON.stringify({step, stepprevSteps: conformance.steps})
+      JSON.stringify({step, prevSteps: conformance.steps})
     ).then(value => {
-      // TODO: Wait for and record ACK of sent step
-      console.log('resolved', value);
+      // Wait for and TODO: record ACK of sent step
+      const stepMessage = new StepMessage().fromJSON(value as unknown as StepMessageProperties);
+
+      if (!stepMessage?.step || !stepMessage?.prevSteps) {
+        console.error(`Malformed JSON: ${JSON.stringify(req.body)} to ${JSON.stringify(stepMessage)}`);
+        res.status(400).send("Malformed JSON");
+        return next();
+      }
+
+      if (!stepMessage.verifySignature(conformance.pubKeys.get(receiver))) {
+        throw new Error(`Expected ACK from ${receiver}: signature verification failed.`);
+      }
+      if (JSON.stringify({step, prevSteps: conformance.steps})
+       !== JSON.stringify({step: stepMessage.step, prevSteps: stepMessage.prevSteps})
+      ) {
+        throw new Error(`Expected ACK from ${receiver}: different step`);
+      }
+      console.log('ACK returned');
+      res.sendStatus(200);
+      return next();
     })
-    .catch(error => next(error));
+    .catch(error => {
+      console.log('Error when waiting for ACK');
+      next(error);
+    })
   }
 }
 

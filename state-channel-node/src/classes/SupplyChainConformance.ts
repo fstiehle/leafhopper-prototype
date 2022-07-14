@@ -8,10 +8,10 @@ export default class SupplyChainConformance implements Conformance {
   caseID: number;
   tokenState: number[];
   steps: Step[];
-  routing: Map<Participant, RoutingInformation>;
+  pubKeys: Map<Participant, string>;
 
-  constructor(routing: Map<Participant, RoutingInformation>) {
-    this.routing = routing;
+  constructor(pubKeys: Map<Participant, string>) {
+    this.pubKeys = pubKeys;
     this.caseID = 0;
     this.tokenState = Array<number>(14).fill(0);
     this.steps = new Array<Step>;
@@ -64,19 +64,19 @@ export default class SupplyChainConformance implements Conformance {
    * @returns 
    */
   step(step: Step, prevSteps: Step[]): boolean {
-    console.log(`Enter with step task id ${step.taskID}`);
+    //console.log(`Enter with step task id ${step.taskID}`);
     if (step.caseID !== this.caseID) {
       return false;
     }
-    console.log("Check previous steps and replay their effect");
+    //console.log("Check previous steps and replay their effect");
     // If a fault is encountered roll back from this state
     const currentTokenState = this.tokenState;
     const currentSteps = this.steps;
-  
+
     for (let index = 0; index < this.tokenState.length; index++) {
       if (this.steps[index] === undefined) {
         if (prevSteps[index] !== undefined) {
-          console.log(`Unknwon step with task id ${prevSteps[index].taskID}`);
+          //console.log(`Unknwon step with task id ${prevSteps[index].taskID}`);
           // There is an unknown step
           // Check and replay them
           if (this.checkStep(prevSteps[index])) {
@@ -87,7 +87,7 @@ export default class SupplyChainConformance implements Conformance {
             );
           } else {
             // Rollback
-            console.log(`Rollback because of ${prevSteps[index]}`);
+            //console.log(`Rollback because of ${prevSteps[index]}`);
             this.steps = currentSteps;
             this.tokenState = currentTokenState;
             return false;
@@ -96,7 +96,7 @@ export default class SupplyChainConformance implements Conformance {
         continue;
       }
 
-      console.log(`Known step with task id ${this.steps[index].taskID}`);
+      //console.log(`Known step with task id ${this.steps[index].taskID}`);
       // Do not need to verify already known steps indepth, just check our known is equal to their known
       if (
         prevSteps[index] !== undefined && 
@@ -106,9 +106,9 @@ export default class SupplyChainConformance implements Conformance {
       }
     }
 
-    console.log(`Check proposed next step ${step.taskID}`);
+    //console.log(`Check proposed next step ${step.taskID}`);
     if (this.checkStep(step)) {
-      console.log(`add next step ${step.taskID} to previous steps`);
+      //console.log(`add next step ${step.taskID} to previous steps`);
       this.steps[step.taskID] = step;
       this.tokenState = this.task(this.tokenState, step.taskID);
       return true;
@@ -121,13 +121,13 @@ export default class SupplyChainConformance implements Conformance {
     if (step.caseID !== this.caseID) {
       return false;
     }
-    // TODO: is it actually their turn?
+    // is it actually their turn?
     if (!this.checkRouting(step.from, step.taskID)) {
       return false;
     }
 
-    // TODO: is it actually from them? 
-    if (!step.verifySignature(this.routing.get(step.from).pubKey)) {
+    // is it actually from them? 
+    if (!step.verifySignature(this.pubKeys.get(step.from))) {
       return false;
     }
 

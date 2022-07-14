@@ -1,7 +1,8 @@
 import { Express, Request, Response, NextFunction } from 'express';
-import { ConformanceCheck } from '../services/ConformanceCheck';
-import {  } from '../services/ConformanceCheck';
+import ConformanceCheck from '../classes/Conformance';
 import { doRequest } from '../helpers/util';
+import Step from '../classes/Step';
+import Identity from '../classes/Identity';
 
 /**
  * 
@@ -23,27 +24,32 @@ import { doRequest } from '../helpers/util';
  * @param res 
  * @param next 
  */
-const begin = (conformance: ConformanceCheck) => {
+const begin = (identity: Identity, conformance: ConformanceCheck) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const taskID = parseInt(req.params.id);
-    // TODO: build step object
     //if (!conformance.check(taskID, req.params.user)) {
     //  return res.status(406).send("Non conforming behaviour.");
     //}
-    // TODO: Check blockchain for possible dispute state 
-    // TODO: Ack the step
-    console.log("Conformance check passed...")
+    // TODO: Check blockchain for possible dispute state
+    const step = new Step({
+      from: identity.me,
+      caseID: 0,
+      taskID: taskID
+    })
+    .sign(identity.privateKey);
+
     const options = {
       headers: {
         'Content-Type': 'application/json',
       },
-      ...conformance.routing[taskID]
+      ...conformance.routing.get(identity.me)
     }
     options.path = `${options.path}/${taskID}`;
     await doRequest(
       options,
-      JSON.stringify({taskID, tokenState: conformance.tokenState})
+      JSON.stringify({step, stepprevSteps: conformance.steps})
     ).then(value => {
+      // TODO: Wait for and record ACK of sent step
       console.log('resolved', value);
     })
     .catch(error => next(error));

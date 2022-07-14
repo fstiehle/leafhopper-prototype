@@ -1,16 +1,12 @@
+import Participant from "./Participant";
 import RoutingInformation from "./RoutingInformation";
 import Step from "./Step";
 
-interface ConformanceCheck {
+export default interface Conformance {
   caseID: number;
   steps: Step[];
   tokenState: Array<number>;
-  routing: RoutingInformation[];
+  routing: Map<Participant, RoutingInformation>;
 
   step(step: Step, previousSteps: Step[]): boolean
-}
-
-export {
-  ConformanceCheck,
-  Step
 }

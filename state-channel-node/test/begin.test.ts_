@@ -3,7 +3,8 @@ process.env.NODE_ENV = 'test';
 import express, { Express, Request, Response } from 'express';
 import chai from 'chai';
 import chaiHttp from 'chai-http';
-import { app, configureServer } from '../src/app';
+import { configureServer } from '../src/app';
+import Participant from '../src/classes/Participant';
 
 chai.use(chaiHttp);
 describe('/GET begin and /POST step', () => {
@@ -11,7 +12,11 @@ describe('/GET begin and /POST step', () => {
   let bulkbuyer: Express;
 
   before(() => {
-    manufacturer = configureServer(express());
+    manufacturer = configureServer(express(), {
+      me: Participant.Manufacturer,
+      publicKey: "",
+      privateKey: ""
+    });
     manufacturer.listen(9002, () => console.log(`Manufacturer Running on 9002 ⚡`));
     bulkbuyer = configureServer(express());
     bulkbuyer.listen(9001, () => console.log(`Bulk Buyer Running on 9001 ⚡`));

@@ -1,9 +1,10 @@
-import express, { Router } from 'express';
-import { ConformanceCheck } from '../services/ConformanceCheck';
+import { Router } from 'express';
+import Identity from '../classes/Identity';
+import ConformanceCheck from '../classes/Conformance';
 import controller from '../controllers/step.controller';
 
-const step = (router: Router, conformance: ConformanceCheck): Router => {
-  return router.post('/:id([0-9]+)', controller(conformance));
+const step = (router: Router, identity: Identity, conformance: ConformanceCheck): Router => {
+  return router.post('/', controller(identity, conformance));
 }
 
 export default step;

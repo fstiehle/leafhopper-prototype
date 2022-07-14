@@ -1,5 +1,5 @@
 import http from 'http';
-import RoutingInformation from '../services/RoutingInformation';
+import RoutingInformation from '../classes/RoutingInformation';
 
 /**
  * Modified from: https://stackoverflow.com/a/56122489

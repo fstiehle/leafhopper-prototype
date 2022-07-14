@@ -1,10 +1,10 @@
 process.env.NODE_ENV = 'test';
 
 import chai from 'chai';
-import SupplyChainConformance from '../src/services/SupplyChainConformance';
-import Participant from "../src/services/Participant";
-import RoutingInformation from '../src/services/RoutingInformation';
-import Step from "../src/services/Step";
+import SupplyChainConformance from '../src/classes/SupplyChainConformance';
+import Participant from "../src/classes/Participant";
+import RoutingInformation from '../src/classes/RoutingInformation';
+import Step from "../src/classes/Step";
 import crypto, { sign } from "crypto";
 import traces from './traces/supplyChain.json'
 const {expect} = chai;
@@ -38,26 +38,14 @@ for (const [participant, routingInformation] of participants) {
 }
 
 const getNewConformanceService = (participants: Map<Participant, RoutingInformation>) => {
-  return new SupplyChainConformance([
-    participants.get(Participant.Manufacturer),
-    participants.get(Participant.BulkBuyer),
-    participants.get(Participant.Supplier),
-    participants.get(Participant.SpecialCarrier),
-    participants.get(Participant.Supplier),
-    participants.get(Participant.SpecialCarrier),
-    participants.get(Participant.SpecialCarrier),
-    participants.get(Participant.Manufacturer),
-    participants.get(Participant.BulkBuyer),
-    participants.get(Participant.BulkBuyer)]);
+  return new SupplyChainConformance(participants);
 }
 
 const getNewStep = (from: Participant, taskID: number) => {
   const step = new Step({
     from,
     taskID,
-    caseID: 0,
-    salt: "x",
-    signature: "x"
+    caseID: 0
   });
   const [_, privateKey] = keys.get(from);
   step.sign(privateKey)

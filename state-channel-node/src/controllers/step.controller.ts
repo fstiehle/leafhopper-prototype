@@ -1,6 +1,7 @@
-import { Express, Request, Response, NextFunction } from 'express';
-import { ConformanceCheck } from '../services/ConformanceCheck';
-import Participant from "../services/Participant";
+import { Request, Response, NextFunction } from 'express';
+import ConformanceCheck from '../classes/ConformanceCheck';
+import Identity from '../classes/Identity';
+import StepJSONPayload from '../classes/StepJSONPayload';
 
 /**
  * 
@@ -30,15 +31,20 @@ import Participant from "../services/Participant";
  * @param res 
  * @param next 
  */
-// TODO: Parse tokenState from JSON bod
-const step = (conformance: ConformanceCheck) => {
+const step = (identity: Identity, conformance: ConformanceCheck) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    // TODO: verif signature chain and catch up on old tasks
-    // TODO: { caseID, taskID, salt, signature }
-    console.log(`Step with ${parseInt(req.params.id)}, previous messages TODO, and new token state ${req.body.tokenState}`);
-    //conformance.check(parseInt(req.params.id), "");
-    res.sendStatus(500);
-    next();
+    let payload: StepJSONPayload;
+    try {
+      payload = JSON.parse(req.body);
+    } catch (err) {
+      res.status(403).send(err);
+      return next();
+    }
+
+    // Check if certificate equals step.from
+    // TODO: Send signed ACK or error back
+    console.log(conformance.step(payload.step, payload.prevSteps));
+    res.sendStatus(200);
   }
 }
 

@@ -1,16 +1,16 @@
-import { ConformanceCheck } from "./conformanceCheck";
+import Conformance from "./Conformance";
 import Step from "./Step";
 import RoutingInformation from "./RoutingInformation";
-import crypto from "crypto";
+import Participant from "./Participant";
 
 /// TODO: Refactor general function into a super class
-export default class SupplyChainConformance implements ConformanceCheck {
+export default class SupplyChainConformance implements Conformance {
   caseID: number;
   tokenState: number[];
   steps: Step[];
-  routing: RoutingInformation[];
+  routing: Map<Participant, RoutingInformation>;
 
-  constructor(routing: RoutingInformation[]) {
+  constructor(routing: Map<Participant, RoutingInformation>) {
     this.routing = routing;
     this.caseID = 0;
     this.tokenState = Array<number>(14).fill(0);
@@ -121,11 +121,17 @@ export default class SupplyChainConformance implements ConformanceCheck {
     if (step.caseID !== this.caseID) {
       return false;
     }
-    if (!step.verifySignature) {
-      return;
+    // TODO: is it actually their turn?
+    if (!this.checkRouting(step.from, step.taskID)) {
+      return false;
     }
-    // TODO: is it actually his turn? checkRouting
 
+    // TODO: is it actually from them? 
+    if (!step.verifySignature(this.routing.get(step.from).pubKey)) {
+      return false;
+    }
+
+    // Is it the right turn?
     if (
       JSON.stringify([...this.tokenState]) !== JSON.stringify(this.task(
         [...this.tokenState], 
@@ -136,5 +142,34 @@ export default class SupplyChainConformance implements ConformanceCheck {
     }
 
     return false;
+  }
+
+  checkRouting(from: Participant, taskID: number): boolean {
+    let required;
+    switch (taskID) {
+      case 0:
+        required = Participant.BulkBuyer;
+        break;
+      case 1:
+      case 11:
+      case 12:
+        required = Participant.Manufacturer;
+        break;
+      case 3:
+      case 5:
+        required = Participant.Middleman;
+        break;
+      case 7: 
+      case 10:
+        required = Participant.SpecialCarrier;
+        break;
+      case 8: 
+      case 9:
+        required = Participant.Supplier
+        break;
+      default:
+        return false;
+    }
+    return required === from;
   }
 }

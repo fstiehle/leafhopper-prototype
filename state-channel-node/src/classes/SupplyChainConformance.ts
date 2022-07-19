@@ -14,7 +14,7 @@ export default class SupplyChainConformance implements Conformance {
     this.pubKeys = pubKeys;
     this.caseID = 0;
     this.tokenState = Array<number>(14).fill(0);
-    this.steps = new Array<Step>;
+    this.steps = new Array<Step>(14);
     this.tokenState[0] = 1;
   }
 
@@ -27,7 +27,8 @@ export default class SupplyChainConformance implements Conformance {
       // only used for internal orchestration
       return tokenState;
     }
-
+    
+    const oldTokenState = [...tokenState];
     // AND branch
     if (tokenState[2] === 1) {
       // enable both AND branches
@@ -42,7 +43,7 @@ export default class SupplyChainConformance implements Conformance {
       tokenState[7] = 1;
     }
     if (tokenState[taskID] === 0) {
-      return tokenState;
+      return oldTokenState;
     }
 
     // advance token state by consuming and producing tokens

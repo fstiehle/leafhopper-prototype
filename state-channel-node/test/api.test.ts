@@ -10,7 +10,6 @@ import RoutingInformation from '../src/classes/RoutingInformation';
 import SupplyChainRouting from '../src/classes/SupplyChainRouting';
 import SupplyChainConformance from '../src/classes/SupplyChainConformance';
 import { Server } from 'node:http';
-import { doesNotMatch } from 'assert';
 const {expect} = chai;
 
 chai.use(chaiHttp);

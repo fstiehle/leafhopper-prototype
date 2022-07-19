@@ -31,6 +31,7 @@ import StepMessage from '../classes/StepMessage';
  */
 const step = (identity: Identity, conformance: ConformanceCheck) => {
   return (req: Request, res: Response, next: NextFunction) => {
+    console.log(req.body);
     const stepMessage = new StepMessage().fromJSON(req.body);
 
     if (!stepMessage?.step || !stepMessage?.prevSteps) {

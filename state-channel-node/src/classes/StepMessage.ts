@@ -27,8 +27,12 @@ export default class StepMessage extends Signable {
     this.prevSteps = new Array<Step>();
     this.signature = obj?.signature;
     this.salt = obj?.salt;
-    for (const step of obj.prevSteps) {
-      this.prevSteps.push(step);
+    for (const stepObj of obj.prevSteps) {
+      if (!stepObj) continue;
+      const prevStep = new Step(stepObj);
+      prevStep.signature = stepObj.signature;
+      prevStep.salt = stepObj.salt;
+      this.prevSteps[prevStep.taskID] = prevStep;
     }
     return this;
   }

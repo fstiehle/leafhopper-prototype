@@ -170,10 +170,10 @@ describe('Dry test conformance check functions', () => {
     for (const trace of traces.conforming) {
       const tokenState: number[] = [...conformance.tokenState];
       for (const taskID of trace) {
-        const prevtokenState = {...tokenState};
+        const prevtokenState = [...tokenState];
         expect(
           conformance.task(tokenState, taskID)
-          ).to.not.eq(prevtokenState)
+          ).to.not.eql(prevtokenState)
       }
       const endState = Array<number>(14).fill(0);
       endState[13] = 1;
@@ -184,7 +184,6 @@ describe('Dry test conformance check functions', () => {
 
   it('test token game by replaying non-conforming traces', (done) => {
     for (const trace of traces.nonConforming) {
-      console.log(trace)
       const tokenState: number[] = [...conformance.tokenState];
       for (const taskID of trace) {
         conformance.task(tokenState, taskID);
@@ -195,6 +194,16 @@ describe('Dry test conformance check functions', () => {
     }
     done();
   });
-  
 
+  it('try to submit a task twice', (done) => {
+    const tokenState: number[] = [...conformance.tokenState];
+    conformance.task(tokenState, 0);
+    conformance.task(tokenState, 1);
+    const prevtokenState = [...tokenState];
+    expect(
+      conformance.task(tokenState, 1)
+    ).to.eql(prevtokenState);
+    done();
+  });
+  
 });

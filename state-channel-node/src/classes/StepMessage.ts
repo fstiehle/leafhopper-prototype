@@ -2,15 +2,15 @@ import Signable from "./Signable";
 import Step from "./Step";
 
 export interface StepMessageProperties {
-  step: Step
-  prevSteps: Step[]
+  step: Step;
+  prevSteps: Step[];
   salt: string;
   signature: string;
 }
 
 export default class StepMessage extends Signable {
-  step: Step
-  prevSteps: Step[]
+  step: Step;
+  prevSteps: Step[];
   salt: string;
   signature: string;
 
@@ -24,7 +24,7 @@ export default class StepMessage extends Signable {
 
   fromJSON(obj: StepMessageProperties) {
     this.step = new Step(obj.step)
-    this.prevSteps = new Array<Step>();
+    this.prevSteps = new Array<Step>(14);
     this.signature = obj?.signature;
     this.salt = obj?.salt;
     for (const stepObj of obj.prevSteps) {

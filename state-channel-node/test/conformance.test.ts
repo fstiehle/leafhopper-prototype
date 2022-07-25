@@ -182,4 +182,19 @@ describe('Dry test conformance check functions', () => {
     done();
   });
 
+  it('test token game by replaying non-conforming traces', (done) => {
+    for (const trace of traces.nonConforming) {
+      console.log(trace)
+      const tokenState: number[] = [...conformance.tokenState];
+      for (const taskID of trace) {
+        conformance.task(tokenState, taskID);
+      }
+      const endState = Array<number>(14).fill(0);
+      endState[13] = 1;
+      expect(tokenState).to.not.eql(endState);
+    }
+    done();
+  });
+  
+
 });

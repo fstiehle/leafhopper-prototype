@@ -77,7 +77,7 @@ export default class SupplyChainConformance implements Conformance {
     for (let index = 0; index < this.tokenState.length; index++) {
       if (this.steps[index] === undefined) {
         if (prevSteps[index] !== undefined) {
-          //console.log(`Unknwon step with task id ${prevSteps[index].taskID}`);
+          // console.log(`Unknwon step with task id ${prevSteps[index].taskID}`);
           // There is an unknown step
           // Check and replay them
           if (this.checkStep(prevSteps[index])) {

@@ -1,5 +1,4 @@
 import Participant from "./Participant";
-import crypto from "crypto";
 import Signable from "./Signable";
 
 interface StepPublicProperties {
@@ -22,10 +21,20 @@ export default class Step extends Signable implements StepPublicProperties {
 
   getSignablePart() {
     return {
-      from: this.from,
-      caseID: this.caseID,
-      taskID: this.taskID,
-      salt: this.salt
+      types: {
+        Step: [
+          {name: 'caseID', type: 'uint'},
+          {name: 'from', type: 'uint'},
+          {name: 'taskID', type: 'uint'},
+          {name: 'salt', type: 'bytes16'}
+        ]
+      },
+      value: {
+        caseID: this.caseID,
+        from: this.from,
+        taskID: this.taskID,
+        salt: this.salt
+      }
     }
   }
 }

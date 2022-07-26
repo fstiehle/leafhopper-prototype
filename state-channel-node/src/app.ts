@@ -5,6 +5,7 @@ import SupplyChainConformance from './classes/SupplyChainConformance';
 import Participant from "./classes/Participant";
 import SupplyChainRouting from './classes/SupplyChainRouting';
 import { getSupplyChainParticipants, configureServer } from './helpers/util';
+import {ethers} from 'ethers';
 
 dotenv.config()
 const port = 9000;
@@ -13,10 +14,7 @@ let pK: string;
 let sK: string;
 
 try {
-  pK = fs.readFileSync('../rsa_id/' + identity + '.pub').toString();
   sK = fs.readFileSync('../rsa_id/' + identity).toString();
-  console.log(pK);
-  console.log(sK);
 } catch (err) {
   console.error(err);
 }
@@ -27,8 +25,7 @@ const app: Express = configureServer(
   express(), 
   {
     me: Participant[identity as keyof typeof Participant],
-    publicKey: pK,
-    privateKey: sK
+    wallet: new ethers.Wallet(sK)
   },
   new SupplyChainRouting(participants),
   new SupplyChainConformance(keys),

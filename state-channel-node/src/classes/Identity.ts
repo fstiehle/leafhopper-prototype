@@ -1,7 +1,15 @@
 import Participant from "./Participant";
 
-export default interface Identity {
+export interface Wallet {
+  signMessage(message: string): Promise<string>;
+}
+
+export default class Identity {
   me: Participant;
-  publicKey: string;
-  privateKey: string;
+  wallet: Wallet
+
+  constructor(me: Participant, wallet: Wallet) {
+    this.me = me;
+    this.wallet = wallet;
+  }
 }

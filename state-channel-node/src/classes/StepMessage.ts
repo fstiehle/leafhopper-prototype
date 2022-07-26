@@ -14,11 +14,26 @@ export default class StepMessage extends Signable {
   salt: string;
   signature: string;
 
-  getSignablePart(): object {
+  getSignablePart() {
     return {
-      step: this.step,
-      prevSteps: this.prevSteps,
-      salt: this.salt
+      types: {
+        Step: [
+          {name: 'caseID', type: 'uint'},
+          {name: 'from', type: 'uint'},
+          {name: 'taskID', type: 'uint'},
+          {name: 'salt', type: 'bytes16'}
+        ],
+        StepMessage: [
+          {name: 'step', type: 'Step'},
+          {name: 'prevSteps', type: 'Step[]'},
+          {name: 'salt', type: 'bytes16'}
+        ]
+      },
+      value: {
+        step: this.step,
+        prevSteps: this.prevSteps,
+        salt: this.salt
+      }
     }
   }
 

@@ -3,7 +3,7 @@ process.env.NODE_ENV = 'test';
 import express from 'express';
 import chai from 'chai';
 import chaiHttp from 'chai-http';
-import crypto from 'crypto';
+import {ethers} from 'ethers';
 import { configureServer } from '../src/helpers/util';
 import Participant from '../src/classes/Participant';
 import RoutingInformation from '../src/classes/RoutingInformation';
@@ -14,7 +14,7 @@ const {expect} = chai;
 
 chai.use(chaiHttp);
 describe('/begin and /step', () => {
-  let keys: Map<Participant, [string, string]>;
+  let keys: Map<Participant, ethers.Wallet>;
   let servers: Map<Participant, Server>;
   let participants: Map<Participant, RoutingInformation>;
 
@@ -28,33 +28,18 @@ describe('/begin and /step', () => {
     ]);
     
     servers = new Map<Participant, Server>();
-    keys = new Map<Participant, [string, string]>();
+    keys = new Map<Participant, ethers.Wallet>();
     const pubKeys = new Map<Participant, string>();
     for (const [participant, routingInformation] of participants) {
-      const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
-
-        // The standard secure default length for RSA keys is 2048 bits
-        modulusLength: 4096,
-        publicKeyEncoding: {
-          type: 'spki',
-          format: 'pem'
-        },
-        privateKeyEncoding: {
-          type: 'pkcs8',
-          format: 'pem',
-          cipher: 'aes-256-cbc',
-          passphrase: 'test'
-        }
-      });
-      routingInformation.pubKey = publicKey;
-      keys.set(participant, [publicKey, privateKey]);
-      pubKeys.set(participant, publicKey)
+      const wallet = ethers.Wallet.createRandom();
+      routingInformation.address = wallet.address;
+      keys.set(participant, wallet);
+      pubKeys.set(participant, wallet.address)
       servers.set(
         participant, 
         configureServer(express(), {
           me: participant,
-          publicKey: publicKey,
-          privateKey: privateKey
+          wallet: wallet
         },
         new SupplyChainRouting(participants),
         new SupplyChainConformance(pubKeys)

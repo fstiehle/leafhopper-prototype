@@ -3,36 +3,28 @@ process.env.NODE_ENV = 'test';
 import chai from 'chai';
 import Participant from '../src/classes/Participant';
 import Step from '../src/classes/Step';
-import crypto from 'crypto';
+import {ethers} from 'ethers';
 const {expect} = chai;
 
 describe('Dry test signature functions', () => {
 
-  it('test signing and verifying', (done) => {
-    const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
-      // The standard secure default length for RSA keys is 2048 bits
-      modulusLength: 4096,
-      publicKeyEncoding: {
-        type: 'spki',
-        format: 'pem'
-      },
-      privateKeyEncoding: {
-        type: 'pkcs8',
-        format: 'pem',
-        cipher: 'aes-256-cbc',
-        passphrase: 'test'
-      }
-    });
+  it('test signing and verifying', async () => {
+    const wallet = ethers.Wallet.createRandom();
 
     const step = new Step({
       from: Participant.BulkBuyer,
       caseID: 0,
       taskID: 0
     })
-    step.sign(privateKey, 'test');
-    expect(step.verifySignature(publicKey), "verify signature...").to.be.true
+    await step.sign(wallet);
+    expect(step.verifySignature(wallet.address), "verify signature...").to.be.true
 
-    done();
+    step.taskID = 1;
+    expect(step.verifySignature(wallet.address), "verify signature...").to.be.false;
+
+    const eve = ethers.Wallet.createRandom();
+    await step.sign(eve);
+    expect(step.verifySignature(wallet.address), "verify signature...").to.be.false;
   });
 
 });

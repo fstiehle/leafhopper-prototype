@@ -30,8 +30,7 @@ import StepMessage from '../classes/StepMessage';
  * Check if task to invoke leads to new token state that was sent
  */
 const step = (identity: Identity, conformance: ConformanceCheck) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.body);
+  return async (req: Request, res: Response, next: NextFunction) => {
     const stepMessage = new StepMessage().fromJSON(req.body);
 
     if (!stepMessage?.step || !stepMessage?.prevSteps) {
@@ -47,7 +46,7 @@ const step = (identity: Identity, conformance: ConformanceCheck) => {
       return next();
     }
 
-    stepMessage.sign(identity.privateKey, 'test');
+    await stepMessage.sign(identity.wallet);
     res.status(200).send(JSON.stringify(stepMessage))
     return next();
   }

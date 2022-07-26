@@ -66,7 +66,6 @@ const doRequest = (options: RoutingInformation, data: string): Promise<string> =
   for (const participant of participants.keys()) {
     let pK;
     try {
-      console.log('../rsa_id/' + participant.toString() + '.pub');
       pK = fs.readFileSync('../rsa_id/' + participant.toString() + '.pub').toString();
     } catch (err) {
       console.error(err);

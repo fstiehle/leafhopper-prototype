@@ -1,10 +1,11 @@
 import Participant from "./Participant";
+import {ethers} from 'ethers';
 
 export default class RoutingInformation {
   participant: Participant
   hostname: string;
   port: number;
-  pubKey: string;
+  address: string;
   path = "/step";
   method = 'POST';
 

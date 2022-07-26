@@ -38,7 +38,7 @@ const begin = (identity: Identity, conformance: ConformanceCheck, routing: Routi
       caseID: 0,
       taskID: taskID
     })
-    .sign(identity.privateKey, 'test');
+    await step.sign(identity.wallet);
     const receiver = routing.next(taskID);
     const options = {
       headers: {

@@ -64,6 +64,7 @@ export default class SupplyChainConformance implements Conformance {
    * @param step {Step}
    * @returns 
    */
+  /// TODO: separation of step and prevSteps is redundant
   step(step: Step, prevSteps: Step[]): boolean {
     //console.log(`Enter with step task id ${step.taskID}`);
     if (step.caseID !== this.caseID) {
@@ -80,7 +81,7 @@ export default class SupplyChainConformance implements Conformance {
           // console.log(`Unknwon step with task id ${prevSteps[index].taskID}`);
           // There is an unknown step
           // Check and replay them
-          if (this.checkStep(prevSteps[index])) {
+          if (prevSteps[index].taskID == index && this.checkStep(prevSteps[index])) {
             this.steps[index] = prevSteps[index];
             this.tokenState = this.task(
               this.tokenState, 
@@ -132,7 +133,7 @@ export default class SupplyChainConformance implements Conformance {
       return false;
     }
 
-    // Is it the right turn?
+    // Is it the right turn? TODO: Move to top?
     if (
       JSON.stringify([...this.tokenState]) !== JSON.stringify(this.task(
         [...this.tokenState], 

@@ -48,7 +48,7 @@ contract SupplyChainRoot is StateChannelRoot, SupplyChainConformance {
         return false;
     }
 
-    function isDisputed() external view onlyParticipants returns (bool) {
+    function isDisputed() external view returns (bool) {
         return disputed;
     }
 

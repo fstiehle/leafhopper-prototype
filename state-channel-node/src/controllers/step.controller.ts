@@ -39,13 +39,15 @@ const step = (identity: Identity, conformance: ConformanceCheck) => {
       return next();
     }
 
+    console.log(stepMessage);
+
     // TODO: Check if certificate equals step.from
     // Send signed ACK or error back
     if (!conformance.step(stepMessage.step, stepMessage.prevSteps)) {
       res.status(403).send("Non-conforming behaviour");
       return next();
     }
-
+    
     await stepMessage.sign(identity.wallet);
     res.status(200).send(JSON.stringify(stepMessage))
     return next();

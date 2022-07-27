@@ -2,10 +2,10 @@ import Signable from "./Signable";
 import Step from "./Step";
 
 export interface StepMessageProperties {
-  step: Step;
-  prevSteps: Step[];
   salt: string;
   signature: string;
+  step: Step;
+  prevSteps: Step[];
 }
 
 export default class StepMessage extends Signable {
@@ -16,24 +16,10 @@ export default class StepMessage extends Signable {
 
   getSignablePart() {
     return {
-      types: {
-        Step: [
-          {name: 'caseID', type: 'uint'},
-          {name: 'from', type: 'uint'},
-          {name: 'taskID', type: 'uint'},
-          {name: 'salt', type: 'bytes16'}
-        ],
-        StepMessage: [
-          {name: 'step', type: 'Step'},
-          {name: 'prevSteps', type: 'Step[]'},
-          {name: 'salt', type: 'bytes16'}
-        ]
-      },
-      value: {
-        step: this.step,
-        prevSteps: this.prevSteps,
-        salt: this.salt
-      }
+      types: ['tuple(uint,uint,uint,bytes16,bytes)', 'tuple(uint,uint,uint,bytes16,bytes)[]', 'bytes16'],
+      value: [
+        this.step.getSignablePart(true).value,
+        this.prevSteps.reduce((acc, step) => { acc.push(step.getSignablePart(true).value); return acc; }, []), this.salt]
     }
   }
 

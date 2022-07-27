@@ -3,32 +3,26 @@ import {ethers} from 'ethers';
 import {Wallet} from './Identity';
 
 export interface SignablePart {
-  types: Record<string, any[]>;
-  value: Record<string, any>;
+  types: string[];
+  value: any[];
 }
 
 export default abstract class Signable {
-  salt: string;
-  signature: string;
+  salt: string = "";
+  signature: string = "";
 
-  domain = {
-    name: "leafhopper",
-    version: "0.1",
-    chainId: 1,
-    verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC'
-  }
-
-  abstract getSignablePart(): SignablePart;
+  abstract getSignablePart(withSignature?: boolean): SignablePart;
 
   async sign(wallet: Wallet) {
     this.salt = '0x' + crypto.randomBytes(16).toString('hex');
     const signable = this.getSignablePart();
+    const encoder = new ethers.utils.AbiCoder();
     try {
       this.signature = await wallet.signMessage(
-        ethers.utils._TypedDataEncoder.encode(
-          this.domain,
-          signable.types,
-          signable.value
+        ethers.utils.arrayify(
+          ethers.utils.keccak256(
+            encoder.encode(signable.types, signable.value)
+          )
         )
       );
     } catch (err) {
@@ -38,14 +32,21 @@ export default abstract class Signable {
 
   verifySignature(expectedAddress: string): boolean {
     const signable = this.getSignablePart();
-    const address = ethers.utils.verifyMessage(
-      ethers.utils._TypedDataEncoder.encode(
-        this.domain,
-        signable.types,
-        signable.value
-      ),
-      this.signature
-    );
+    const encoder = new ethers.utils.AbiCoder;
+    let address;
+    console.log(signable.value);
+    try {
+      address = ethers.utils.verifyMessage(
+        ethers.utils.arrayify(
+          ethers.utils.keccak256(
+            encoder.encode(signable.types, signable.value)
+          )
+        ),
+        this.signature
+      )
+    } catch (err) {
+      console.error(err);
+    };
     return expectedAddress === address;
   }
 }

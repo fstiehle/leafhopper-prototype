@@ -1,5 +1,4 @@
 import Participant from "./Participant";
-import {ethers} from 'ethers';
 
 export default class RoutingInformation {
   participant: Participant

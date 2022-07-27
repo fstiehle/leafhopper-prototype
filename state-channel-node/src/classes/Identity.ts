@@ -1,7 +1,9 @@
 import Participant from "./Participant";
 
+type Bytes = ArrayLike<number>;
+
 export interface Wallet {
-  signMessage(message: string): Promise<string>;
+  signMessage(message: Bytes): Promise<string>;
 }
 
 export default class Identity {

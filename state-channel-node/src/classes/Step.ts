@@ -5,6 +5,8 @@ interface StepPublicProperties {
   from: Participant;
   caseID: number;
   taskID: number;
+  salt?: string;
+  signature?: string;
 }
 
 export default class Step extends Signable implements StepPublicProperties {
@@ -16,25 +18,23 @@ export default class Step extends Signable implements StepPublicProperties {
 
   constructor(props: StepPublicProperties) {
     super();
-    Object.assign(this, props);
+    this.from = props.from;
+    this.caseID = props.caseID;
+    this.taskID = props.taskID;
+    this.salt = props.salt ? props.salt : "";
+    this.signature = props.signature ? props.signature : "";
   }
 
-  getSignablePart() {
+  getSignablePart(withSignature = false) {
+    const payload: any[] = [this.caseID, this.from, this.taskID, this.salt];
+    const types = ['uint', 'uint', 'uint','bytes16'];
+    if (withSignature) { 
+      payload.push(this.signature);
+      types.push('bytes');
+    }
     return {
-      types: {
-        Step: [
-          {name: 'caseID', type: 'uint'},
-          {name: 'from', type: 'uint'},
-          {name: 'taskID', type: 'uint'},
-          {name: 'salt', type: 'bytes16'}
-        ]
-      },
-      value: {
-        caseID: this.caseID,
-        from: this.from,
-        taskID: this.taskID,
-        salt: this.salt
-      }
+      types: types,
+      value: payload
     }
   }
 }

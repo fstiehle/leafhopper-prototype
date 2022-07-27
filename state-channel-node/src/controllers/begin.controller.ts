@@ -5,6 +5,7 @@ import Step from '../classes/Step';
 import Identity from '../classes/Identity';
 import Routing from '../classes/Routing';
 import StepMessage, { StepMessageProperties } from '../classes/StepMessage';
+import Oracle from '../classes/Oracle';
 
 /**
  * 
@@ -21,18 +22,27 @@ import StepMessage, { StepMessageProperties } from '../classes/StepMessage';
  */
 
 /**
- * 
- * @param req 
- * @param res 
- * @param next 
+ * TODO
  */
-const begin = (identity: Identity, conformance: ConformanceCheck, routing: Routing) => {
+const begin = (
+  identity: Identity,
+  conformance: ConformanceCheck,
+  routing: Routing,
+  oracle: Oracle
+  ) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const taskID = parseInt(req.params.id);
     //if (!conformance.check(taskID, req.params.user)) {
     //  return res.status(406).send("Non conforming behaviour.");
     //}
-    // TODO: Check blockchain for possible dispute state
+
+    // Check blockchain for possible dispute state
+    if (oracle.contract && await oracle.isDisputed) {
+      console.log('Dispute is raised.');
+      res.status(400).send("A dispute is currently active.");
+      return next();
+    }
+
     const step = new Step({
       from: identity.me,
       caseID: 0,
@@ -50,7 +60,7 @@ const begin = (identity: Identity, conformance: ConformanceCheck, routing: Routi
       options,
       JSON.stringify({step, prevSteps: conformance.steps})
     ).then(value => {
-      // Wait for and TODO: record ACK of sent step
+      // Wait for ACK of sent step
       const stepMessage = new StepMessage().fromJSON(value as unknown as StepMessageProperties);
 
       if (!stepMessage?.step || !stepMessage?.prevSteps) {

@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import Step from '../classes/Step';
 import ConformanceCheck from '../classes/Conformance';
 import Identity from '../classes/Identity';
 import StepMessage from '../classes/StepMessage';
+import Oracle from '../classes/Oracle';
 
 /**
  * 
@@ -29,17 +29,22 @@ import StepMessage from '../classes/StepMessage';
  * Receives new token state from other participant and task to invoke 
  * Check if task to invoke leads to new token state that was sent
  */
-const step = (identity: Identity, conformance: ConformanceCheck) => {
+const step = (identity: Identity, conformance: ConformanceCheck, oracle: Oracle) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    const stepMessage = new StepMessage().fromJSON(req.body);
 
+    // Check blockchain for possible dispute state
+    if (oracle.contract && await oracle.isDisputed) {
+      console.log('Dispute is raised.');
+      res.status(400).send("A dispute is currently active.");
+      return next();
+    }
+
+    const stepMessage = new StepMessage().fromJSON(req.body);
     if (!stepMessage?.step || !stepMessage?.prevSteps) {
       console.error(`Malformed JSON: ${JSON.stringify(req.body)} to ${JSON.stringify(stepMessage)}`);
       res.status(400).send("Malformed JSON");
       return next();
     }
-
-    console.log(stepMessage);
 
     // TODO: Check if certificate equals step.from
     // Send signed ACK or error back

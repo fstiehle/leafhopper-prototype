@@ -10,6 +10,7 @@ import RoutingInformation from '../src/classes/RoutingInformation';
 import SupplyChainRouting from '../src/classes/SupplyChainRouting';
 import SupplyChainConformance from '../src/classes/SupplyChainConformance';
 import { Server } from 'node:http';
+import Oracle from '../src/classes/Oracle';
 const {expect} = chai;
 
 chai.use(chaiHttp);
@@ -42,7 +43,8 @@ describe('/begin and /step', () => {
           wallet: wallet
         },
         new SupplyChainRouting(participants),
-        new SupplyChainConformance(pubKeys)
+        new SupplyChainConformance(pubKeys),
+        new Oracle(null, wallet, [ethers.providers.getDefaultProvider()])
         )
         .listen(routingInformation.port, () => console.log(`${participant} Running on ${routingInformation.port} ⚡`))
       );

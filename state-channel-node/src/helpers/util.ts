@@ -9,6 +9,8 @@ import Conformance from '../classes/Conformance';
 import helmet from 'helmet';
 import beginRouter from '../routes/begin.route';
 import stepRouter from '../routes/step.route';
+import disputeRouter from '../routes/dispute.route';
+import Oracle from '../classes/Oracle';
 
 /**
  * Modified from: https://stackoverflow.com/a/56122489
@@ -88,13 +90,15 @@ const doRequest = (options: RoutingInformation, data: string): Promise<string> =
   app: Express, 
   identity: Identity,
   routing: Routing,
-  conformance: Conformance
+  conformance: Conformance,
+  oracle: Oracle
   ) => {
   const router = express.Router();
   app.use(helmet());
   app.use(express.json());
-  app.use('/begin', beginRouter(router, identity, conformance, routing));
-  app.use('/step', stepRouter(router, identity, conformance));
+  app.use('/begin', beginRouter(router, identity, conformance, routing, oracle));
+  app.use('/step', stepRouter(router, identity, conformance, oracle));
+  app.use('/dispute', disputeRouter(router, conformance, oracle));
 
   app.use((error: Error, _: Request, response: Response, next: NextFunction) => {
     const message = error.message || 'Something went wrong';

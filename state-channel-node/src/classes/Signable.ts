@@ -34,7 +34,6 @@ export default abstract class Signable {
     const signable = this.getSignablePart();
     const encoder = new ethers.utils.AbiCoder;
     let address;
-    console.log(signable.value);
     try {
       address = ethers.utils.verifyMessage(
         ethers.utils.arrayify(

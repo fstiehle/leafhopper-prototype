@@ -1,10 +1,7 @@
 import Participant from "./Participant";
+import { ethers } from 'ethers';
 
-type Bytes = ArrayLike<number>;
-
-export interface Wallet {
-  signMessage(message: Bytes): Promise<string>;
-}
+export type Wallet = ethers.Signer;
 
 export default class Identity {
   me: Participant;

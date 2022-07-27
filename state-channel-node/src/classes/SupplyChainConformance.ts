@@ -1,6 +1,5 @@
 import Conformance from "./Conformance";
 import Step from "./Step";
-import RoutingInformation from "./RoutingInformation";
 import Participant from "./Participant";
 
 /// TODO: Refactor general function into a super class

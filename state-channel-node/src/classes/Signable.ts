@@ -8,8 +8,8 @@ export interface SignablePart {
 }
 
 export default abstract class Signable {
-  salt: string = "";
-  signature: string = "";
+  salt = "";
+  signature = "";
 
   abstract getSignablePart(withSignature?: boolean): SignablePart;
 
@@ -27,7 +27,7 @@ export default abstract class Signable {
       );
     } catch (err) {
       console.error(err);
-    };
+    }
   }
 
   verifySignature(expectedAddress: string): boolean {
@@ -45,7 +45,7 @@ export default abstract class Signable {
       )
     } catch (err) {
       console.error(err);
-    };
+    }
     return expectedAddress === address;
   }
 }

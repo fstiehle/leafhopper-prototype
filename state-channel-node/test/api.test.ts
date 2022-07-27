@@ -27,13 +27,12 @@ describe('/begin and /step', () => {
       [Participant.Supplier, new RoutingInformation(Participant.Supplier, 'localhost', 9004)],
       [Participant.SpecialCarrier, new RoutingInformation(Participant.SpecialCarrier, 'localhost', 9005)],
     ]);
-    
+
     servers = new Map<Participant, Server>();
     keys = new Map<Participant, ethers.Wallet>();
     const pubKeys = new Map<Participant, string>();
     for (const [participant, routingInformation] of participants) {
       const wallet = ethers.Wallet.createRandom();
-      routingInformation.address = wallet.address;
       keys.set(participant, wallet);
       pubKeys.set(participant, wallet.address)
       servers.set(

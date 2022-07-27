@@ -21,7 +21,6 @@ const pubKeys = new Map<Participant, string>();
 const keys =  new Map<Participant, ethers.Wallet>();
 for (const [participant, routingInformation] of participants) {
   const wallet = ethers.Wallet.createRandom();
-  routingInformation.address = wallet.address;
   keys.set(participant, wallet);
   pubKeys.set(participant, wallet.address)
 }

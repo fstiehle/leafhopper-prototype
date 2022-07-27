@@ -8,20 +8,6 @@ import StepMessage, { StepMessageProperties } from '../classes/StepMessage';
 import Oracle from '../classes/Oracle';
 
 /**
- * 
- app.get('/authenticate', (req, res) => {
-  const cert = req.connection.getPeerCertificate();
-  if (req.client.authorized) {
-    res.send(`Hello [${cert.subject.CN}], your certificate was issued by [${cert.issuer.CN}]\n\n`);
-  } else if (cert.subject) {
-    res.status(403).send(`Sorry [${cert.subject.CN}], certificates from [${cert.issuer.CN}] are not welcome here.`)
-  } else {
-    res.status(401).send(`Sorry, client certificate required to continue`);
-  }
-});
- */
-
-/**
  * TODO
  */
 const begin = (
@@ -32,9 +18,11 @@ const begin = (
   ) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const taskID = parseInt(req.params.id);
-    //if (!conformance.check(taskID, req.params.user)) {
-    //  return res.status(406).send("Non conforming behaviour.");
-    //}
+    // For testing, we permit malicous behaviour issued from our own node.
+    // Normally, the following code can be used to prevent some errors early locally.
+    // if (!conformance.check(taskID, req.params.user)) {
+    //   return res.status(406).send("Non conforming behaviour.");
+    // }
 
     // Check blockchain for possible dispute state
     if (oracle.contract && await oracle.isDisputed) {

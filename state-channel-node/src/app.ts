@@ -4,7 +4,7 @@ import express, { Express } from 'express';
 import SupplyChainConformance from './classes/SupplyChainConformance';
 import Participant from "./classes/Participant";
 import SupplyChainRouting from './classes/SupplyChainRouting';
-import { getSupplyChainParticipants, configureServer } from './helpers/util';
+import { configureServer, getParticipantsKeys, getParticipantsRoutingInformation } from './helpers/util';
 import { ethers } from 'ethers';
 import Oracle from './classes/Oracle';
 
@@ -16,13 +16,14 @@ let pK: string;
 let sK: string;
 
 try {
-  sK = fs.readFileSync('../rsa_id/' + IDENTITY).toString();
+  sK = fs.readFileSync('/keys/' + IDENTITY + '.key').toString();
 } catch (err) {
   console.error(err);
 }
 
 const wallet = new ethers.Wallet(sK);
-const {participants, keys} = getSupplyChainParticipants();
+const participants = getParticipantsRoutingInformation();
+const keys = getParticipantsKeys(participants.keys());
 
 const app: Express = configureServer(
   express(), 
@@ -33,11 +34,12 @@ const app: Express = configureServer(
   new SupplyChainRouting(participants),
   new SupplyChainConformance(keys),
   new Oracle(
-    ROOT_CONTRACT, wallet, [new ethers.providers.EtherscanProvider(), new ethers.providers.InfuraProvider()])
+    ROOT_CONTRACT, wallet, [new ethers.providers.EtherscanProvider(), new ethers.providers.InfuraProvider()]
+  )
 );
 
 app.listen(port, () => console.log(`Running on ${port} ⚡`));
 
 export {
   configureServer
-} 
+}

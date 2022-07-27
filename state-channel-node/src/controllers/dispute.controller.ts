@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import ConformanceCheck from '../classes/Conformance';
-import StepMessage from '../classes/StepMessage';
 import Oracle from '../classes/Oracle';
 
 /**
@@ -18,7 +17,7 @@ const dispute = (conformance: ConformanceCheck, oracle: Oracle) => {
     }
 
     // Check blockchain for possible dispute state
-    if (await oracle.isDisputed) {
+    if (await oracle.isDisputed()) {
 
       console.log('Dispute is already raised.');
       if (await oracle.state(conformance.steps)) {

@@ -29,7 +29,7 @@ export default class Oracle {
   async dispute(steps: Step[]): Promise<boolean> {
     const tx = await this.contract.dispute(steps);
     const receipt = await tx.wait(CONFIRMATION_BLOCKS);
-    if (receipt.events?.filter((x) => {return x.event == DISPUTE_EVENT})) { return true };
+    if (receipt.events?.filter((x) => {return x.event == DISPUTE_EVENT})) { return true }
     return false;
   }
 

@@ -5,6 +5,7 @@
   "license": "MIT",
   "author": "Fabian Stiehle",
   "scripts": {
+    "keygen": "node dist/state-channel-node/keys/_keygen.script.js",
     "lint": "eslint . --ext .ts",
     "build": "eslint . --ext .ts && rimraf dist && tsc",
     "preserve": "npm run build",

@@ -11,6 +11,7 @@ import beginRouter from '../routes/begin.route';
 import stepRouter from '../routes/step.route';
 import disputeRouter from '../routes/dispute.route';
 import Oracle from '../classes/Oracle';
+import { ethers } from 'ethers';
 
 /**
  * Modified from: https://stackoverflow.com/a/56122489
@@ -55,28 +56,31 @@ const doRequest = (options: RoutingInformation, data: string): Promise<string> =
 /**
  * @returns Participants involved in the supply chain use case, their public keys and routing information
  */
- const getSupplyChainParticipants = () => {
-  const participants = new Map<Participant, RoutingInformation>([
+const getParticipantsRoutingInformation = () => {
+  return new Map<Participant, RoutingInformation>([
     [Participant.BulkBuyer, new RoutingInformation(Participant.BulkBuyer, 'localhost', 9001)],
     [Participant.Manufacturer, new RoutingInformation(Participant.Manufacturer, 'localhost', 9002)],
     [Participant.Middleman, new RoutingInformation(Participant.Middleman, 'localhost', 9003)],
     [Participant.Supplier, new RoutingInformation(Participant.Supplier, 'localhost', 9004)],
     [Participant.SpecialCarrier, new RoutingInformation(Participant.SpecialCarrier, 'localhost', 9005)],
   ]);
+}
 
+const getParticipantsKeys = (p: IterableIterator<Participant>) => {
   const keys = new Map<Participant, string>();
-  for (const participant of participants.keys()) {
+  for (const participant of p) {
     let pK;
     try {
-      pK = fs.readFileSync('../rsa_id/' + participant.toString() + '.pub').toString();
+      pK = fs.readFileSync('/keys/' + participant.toString() + '.pub').toString();
+      pK = ethers.utils.computeAddress(pK);
     } catch (err) {
       console.error(err);
     }
     keys.set(participant, pK);
   }
-
-  return {participants, keys};
+  return keys;
 }
+
 
 /**
  * Return the configured express server
@@ -118,7 +122,8 @@ const doRequest = (options: RoutingInformation, data: string): Promise<string> =
 }
 
 export {
-  getSupplyChainParticipants,
+  getParticipantsRoutingInformation,
+  getParticipantsKeys,
   configureServer,
   doRequest
 }

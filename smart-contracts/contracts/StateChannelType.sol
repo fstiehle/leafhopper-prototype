@@ -4,18 +4,16 @@ pragma solidity ^0.8.9;
 interface StateChannelType {
 
   struct Step {
-    string from;
+    uint from;
     uint caseID;
     uint taskID;
-    string salt;
-    string signature;
+    bytes16 salt;
+    bytes signature;
   }
 
   struct Ack {
     Step step;
-    string salt;
-    string signature;
+    bytes16 salt;
+    bytes signature;
   }
-}  
-  
-  
+}

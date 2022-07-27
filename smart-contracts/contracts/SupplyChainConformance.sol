@@ -5,6 +5,14 @@ import './Conformance.sol';
 
 contract SupplyChainConformance is Conformance {
 
+  enum Participant {
+    BulkBuyer,
+    Manufacturer,
+    Middleman,
+    Supplier,
+    SpecialCarrier
+  }
+
   function task(uint tokenState, uint id) external pure returns (uint) {
     if (id == 2 || id == 4 || id == 6 || id > 12) {
         // only used for internal orchestration
@@ -35,5 +43,20 @@ contract SupplyChainConformance is Conformance {
     tokenState |= 1 << (id + 1);
 
     return tokenState;
+  }
+
+  function route(uint taskID) external pure returns (uint) {
+    if (0 == taskID) {
+      return uint(Participant.BulkBuyer);
+    } else if (1 == taskID || 11 == taskID || 12 == taskID) {
+      return uint(Participant.Manufacturer);
+    } else if (3 == taskID || 5 == taskID) {
+      return uint(Participant.Middleman);
+    } else if (7 == taskID || 10 == taskID) {
+      return uint(Participant.SpecialCarrier);
+    } else if (8 == taskID || 9 == taskID) {
+      return uint(Participant.Supplier);
+    }
+    return 99;
   }
 }

@@ -21,8 +21,8 @@ export default class Step extends Signable implements StepPublicProperties {
     this.from = props.from;
     this.caseID = props.caseID;
     this.taskID = props.taskID;
-    this.salt = props.salt ? props.salt : "";
-    this.signature = props.signature ? props.signature : "";
+    this.salt = props.salt ? props.salt : "0x00000000000000000000000000000000";
+    this.signature = props.signature ? props.signature : "0x";
   }
 
   getSignablePart(withSignature = false) {

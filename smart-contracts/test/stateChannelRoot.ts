@@ -38,20 +38,53 @@ describe('StateChannelRoot SupplyChain Contract', () => {
 
   it('test dispute with conforming behaviour', async () => {
     const steps: Step[] = new Array<Step>();
-    steps.push(new Step({
+    for (let index = 0; index < 14; index++) {
+      steps.push(new Step({
+        from: 0,
+        caseID: 0,
+        taskID: 0
+      }))
+    }
+    steps[0] = new Step({
       from: 0,
       caseID: 0,
       taskID: 0
-    }))
+    })
     await steps[0].sign(bulkBuyer);
-    steps.push(new Step({
+    steps[1] = new Step({
       from: 1,
       caseID: 0,
       taskID: 1
-    }))
+    })
     await steps[1].sign(manufcaturer);
+    steps[3] = new Step({
+      from: 2,
+      caseID: 0,
+      taskID: 3
+    })
+    await steps[3].sign(middleman);
+    steps[5] = new Step({
+      from: 2,
+      caseID: 0,
+      taskID: 5
+    })
+    await steps[5].sign(middleman);
+
+    let tx = await supplyChain.connect(specialCarrier).dispute(steps);
+    expect(tx).to.emit(supplyChain, 'DisputeSucessfullyRaised');
+
+    steps[7] = new Step({
+      from: 4,
+      caseID: 0,
+      taskID: 7
+    })
+    await steps[7].sign(specialCarrier);
     
-    const tx = await supplyChain.connect(manufcaturer).dispute(steps);
+    tx = await supplyChain.connect(supplier).dispute(steps);
+    expect(tx).to.emit(supplyChain, 'DisputeRejected');
+
+    tx = await supplyChain.connect(supplier).state(steps);
+    expect(tx).to.not.throw;
   });
 
 });

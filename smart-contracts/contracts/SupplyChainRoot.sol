@@ -41,8 +41,10 @@ contract SupplyChainRoot is StateChannelRoot, SupplyChainConformance {
     function dispute(Step[] calldata steps) external onlyParticipants returns (bool) {
         if (!disputed && checkSteps(steps)) {
             disputed = true;
+            emit DisputeSucessfullyRaised(msg.sender);
             return true;
         }
+        emit DisputeRejected(msg.sender);
         return false;
     }
 

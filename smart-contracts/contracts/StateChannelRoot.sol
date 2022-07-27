@@ -15,6 +15,6 @@ interface StateChannelRoot is StateChannelType {
   function state(Step[] calldata steps) external returns (bool);
   function ack(Ack calldata ack) external returns (bool);
   function isDisputed() external view returns (bool);
-  event DisputeSucessfullyRaised();
-  event DisputeRejected();
+  event DisputeSucessfullyRaised(address);
+  event DisputeRejected(address);
 }

@@ -1,4 +1,4 @@
-rsa_id_*
+keys
 *.env
 
 # From https://github.com/geshan/expressjs-structure/blob/master/.gitignore

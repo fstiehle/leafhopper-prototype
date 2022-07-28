@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
-import SupplyChainRootArtifact from '../../smart_contracts/artifacts/contracts/SupplyChainRoot.sol/SupplyChainRoot.json';
-import { SupplyChainRoot } from '../../smart_contracts/typechain/SupplyChainRoot';
+import SupplyChainRootArtifact from '../../contracts/artifacts/contracts/SupplyChainRoot.sol/SupplyChainRoot.json';
+import { SupplyChainRoot } from '../../contracts/typechain/SupplyChainRoot';
 import { Wallet } from './Identity';
 import Step from './Step';
 

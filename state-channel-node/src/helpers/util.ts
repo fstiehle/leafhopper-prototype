@@ -1,4 +1,3 @@
-import fs from 'fs';
 import Participant from '../classes/Participant';
 import RoutingInformation from '../classes/RoutingInformation';
 import express, { Express, Request, Response, NextFunction } from 'express';
@@ -10,7 +9,6 @@ import beginRouter from '../routes/begin.route';
 import stepRouter from '../routes/step.route';
 import disputeRouter from '../routes/dispute.route';
 import Oracle from '../classes/Oracle';
-import { ethers } from 'ethers';
 import RequestServer from '../classes/RequestServer';
 
 /**
@@ -29,18 +27,10 @@ const getParticipantsRoutingInformation = () => {
 const getParticipantsKeys = (p: IterableIterator<Participant>) => {
   const keys = new Map<Participant, string>();
   for (const participant of p) {
-    let pK;
-    try {
-      pK = fs.readFileSync('/keys/' + participant.toString() + '.pub').toString();
-      pK = ethers.utils.computeAddress(pK);
-    } catch (err) {
-      console.error(err);
-    }
-    keys.set(participant, pK);
+    keys.set(participant, process.env.APP_ADDRESS);
   }
   return keys;
 }
-
 
 /**
  * Return the configured express server

@@ -1,5 +1,4 @@
 process.env.NODE_ENV = 'test';
-
 import fs from 'fs';
 import express from 'express';
 import chai from 'chai';

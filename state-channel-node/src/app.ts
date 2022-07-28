@@ -1,4 +1,5 @@
-import * as dotenv from 'dotenv';
+import dotenv from 'dotenv';
+dotenv.config();
 import fs from 'fs';
 import https from 'https';
 import express, { Express } from 'express';
@@ -10,26 +11,25 @@ import { ethers } from 'ethers';
 import Oracle from './classes/Oracle';
 import RequestServer from './classes/RequestServer';
 
-dotenv.config()
-const port = 9000;
-const ROOT_CONTRACT = dotenv.parse("ROOT_CONTRACT").ROOT_CONTRACT;
-const IDENTITY = dotenv.parse("IDENTITY").IDENTITY;
+const ROOT_CONTRACT = process.env.APP_ADDRESS_CONTRACT;
+const IDENTITY = process.env.APP_IDENTITY;
+
 let rootCA: string;
 let sK: string;
 let cert: string;
-
 try {
-  sK = fs.readFileSync('./keys/' + IDENTITY + '.key').toString();
-  rootCA = fs.readFileSync('./keys/rootCA.crt').toString();
-  cert = fs.readFileSync('./keys/' + IDENTITY + '.crt').toString();
+  sK = fs.readFileSync(process.env.PWD + '/keys/' + IDENTITY + '.key').toString();
+  rootCA = fs.readFileSync(process.env.PWD + '/keys/rootCA.crt').toString();
+  cert = fs.readFileSync(process.env.PWD + '/keys/' + IDENTITY + '.crt').toString();
 } catch (err) {
   console.error(err);
 }
 
-// TODO: create from mnemonic
-const wallet = ethers.Wallet.createRandom();
+const wallet = ethers.Wallet.fromMnemonic(process.env.APP_MNEMONIC);
 const participants = getParticipantsRoutingInformation();
 const keys = getParticipantsKeys(participants.keys());
+const me = Participant[IDENTITY as keyof typeof Participant];
+const port = participants.get(Number.parseInt(IDENTITY)).port;
 
 const app: Express = configureServer(
   express(), 
@@ -53,7 +53,7 @@ const httpsServer = https.createServer(
   }, 
   app
 );
-httpsServer.listen(port, () => console.log(`Running on ${port} ⚡`));
+httpsServer.listen(port, () => console.log(`${me} running on ${port} ⚡`));
 
 export {
   configureServer

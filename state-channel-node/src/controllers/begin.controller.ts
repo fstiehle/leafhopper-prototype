@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import ConformanceCheck from '../classes/Conformance';
-import { doRequest } from '../helpers/util';
 import Step from '../classes/Step';
 import Identity from '../classes/Identity';
 import Routing from '../classes/Routing';
 import StepMessage, { StepMessageProperties } from '../classes/StepMessage';
 import Oracle from '../classes/Oracle';
+import RequestServer from '../classes/RequestServer';
 
 /**
  * TODO
@@ -14,7 +14,8 @@ const begin = (
   identity: Identity,
   conformance: ConformanceCheck,
   routing: Routing,
-  oracle: Oracle
+  oracle: Oracle,
+  requestServer: RequestServer
   ) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const taskID = parseInt(req.params.id);
@@ -44,7 +45,7 @@ const begin = (
       },
       ...routing.get(receiver)
     }
-    await doRequest(
+    await requestServer.doRequest(
       options,
       JSON.stringify({step, prevSteps: conformance.steps})
     ).then(value => {

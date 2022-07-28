@@ -1,4 +1,3 @@
-import http from 'http';
 import fs from 'fs';
 import Participant from '../classes/Participant';
 import RoutingInformation from '../classes/RoutingInformation';
@@ -12,46 +11,7 @@ import stepRouter from '../routes/step.route';
 import disputeRouter from '../routes/dispute.route';
 import Oracle from '../classes/Oracle';
 import { ethers } from 'ethers';
-
-/**
- * Modified from: https://stackoverflow.com/a/56122489
- * Do a request with options provided.
- *
- * @param {Object} options
- * @param {string} data
- * @return {Promise} a promise of request
- */
-const doRequest = (options: RoutingInformation, data: string): Promise<string> => {
-  console.log(`${options.method} request to ${options.hostname}:${options.port}${options.path}`);
-  return new Promise((resolve, reject) => {
-    const req = http.request(options, (res) => {
-      res.setEncoding('utf8');
-      let responseBody = '';
-
-      res.on('data', (chunk) => {
-        responseBody += chunk;
-      });
-
-      res.on('end', () => {
-        if (res.statusCode !== 200)
-          return reject(new Error(`Error when trying to reach next participant: ${res.statusCode} ${res.statusMessage}`));
-
-        try {
-          resolve(JSON.parse(responseBody));
-        } catch (error) {
-          throw new Error(error);
-        }
-      });
-    });
-
-    req.on('error', (err) => {
-      reject(err);
-    });
-
-    req.write(data)
-    req.end();
-  });
-}
+import RequestServer from '../classes/RequestServer';
 
 /**
  * @returns Participants involved in the supply chain use case, their public keys and routing information
@@ -95,12 +55,13 @@ const getParticipantsKeys = (p: IterableIterator<Participant>) => {
   identity: Identity,
   routing: Routing,
   conformance: Conformance,
-  oracle: Oracle
+  oracle: Oracle,
+  requestServer: RequestServer
   ) => {
   const router = express.Router();
   app.use(helmet());
   app.use(express.json());
-  app.use('/begin', beginRouter(router, identity, conformance, routing, oracle));
+  app.use('/begin', beginRouter(router, identity, conformance, routing, oracle, requestServer));
   app.use('/step', stepRouter(router, identity, conformance, oracle));
   app.use('/dispute', disputeRouter(router, conformance, oracle));
 
@@ -124,6 +85,5 @@ const getParticipantsKeys = (p: IterableIterator<Participant>) => {
 export {
   getParticipantsRoutingInformation,
   getParticipantsKeys,
-  configureServer,
-  doRequest
+  configureServer
 }

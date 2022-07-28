@@ -4,15 +4,17 @@ import ConformanceCheck from '../classes/Conformance';
 import controller from '../controllers/begin.controller';
 import Routing from '../classes/Routing';
 import Oracle from '../classes/Oracle';
+import RequestServer from '../classes/RequestServer';
 
 const begin = (
   router: Router, 
   identity: Identity, 
   conformance: ConformanceCheck,
   flow: Routing,
-  oracle: Oracle
+  oracle: Oracle,
+  requestServer: RequestServer
   ): Router => {
-  router.get('/:id([0-9]+)', controller(identity, conformance, flow, oracle));
+  router.get('/:id([0-9]+)', controller(identity, conformance, flow, oracle, requestServer));
   return router;
 }
 

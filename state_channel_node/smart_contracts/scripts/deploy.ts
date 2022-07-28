@@ -14,12 +14,12 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const WorldPurpose = await ethers.getContractFactory('WorldPurpose');
-  const worldPurpose = await WorldPurpose.deploy();
+  const SupplyChainRoot = await ethers.getContractFactory('SupplyChainRoot');
+  const supplyChainRoot = await SupplyChainRoot.deploy();
 
-  await worldPurpose.deployed();
+  await supplyChainRoot.deployed();
 
-  console.log('WorldPurpose deployed to:', worldPurpose.address);
+  console.log('WorldPurpose deployed to:', supplyChainRoot.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -29,7 +29,7 @@ const wallet = ethers.Wallet.fromMnemonic(process.env.APP_MNEMONIC);
 const participants = getParticipantsRoutingInformation();
 const keys = getParticipantsKeys(participants.keys());
 const me = Participant[IDENTITY as keyof typeof Participant];
-const port = participants.get(Number.parseInt(IDENTITY)).port;
+const port = 8080;
 
 const app: Express = configureServer(
   express(), 

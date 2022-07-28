@@ -1,0 +1,37 @@
+version: "0.1"
+services:
+  bulkbuyer:
+    build: .
+    ports:
+      - "8000:8080"
+    environment:
+      APP_IDENTITY: 0
+      APP_MNEMONIC: "bottom century muffin success mask duck brief wet soap harbor inch point"
+  manufacturer:
+    build: .
+    ports:
+      - "8001:8080"
+    environment:
+      APP_IDENTITY: 1
+      APP_MNEMONIC: "bottom century muffin success mask duck brief wet soap harbor inch point"
+  middleman:
+    build: .
+    ports:
+      - "8002:8080"
+    environment:
+      APP_IDENTITY: 2
+      APP_MNEMONIC: "bottom century muffin success mask duck brief wet soap harbor inch point"
+  supplier:
+    build: .
+    ports:
+      - "8003:8080"
+    environment:
+      APP_IDENTITY: 3
+      APP_MNEMONIC: "bottom century muffin success mask duck brief wet soap harbor inch point"
+  specialcarrier:
+    build: .
+    ports:
+      - "8004:8080"
+    environment:
+      APP_IDENTITY: 4
+      APP_MNEMONIC: "bottom century muffin success mask duck brief wet soap harbor inch point"

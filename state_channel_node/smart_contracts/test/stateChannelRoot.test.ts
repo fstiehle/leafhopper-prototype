@@ -6,7 +6,7 @@ import {SupplyChainRoot} from '../typechain/SupplyChainRoot';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 import supplyChainTraces from './traces/supplyChain.json';
 
-import Step from '../../state-channel-node/src/classes/Step';
+import Step from '../../src/classes/Step';
 
 const {deployContract} = waffle;
 const {expect} = chai;

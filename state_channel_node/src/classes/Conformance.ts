@@ -9,4 +9,5 @@ export default interface Conformance {
   pubKeys: Map<Participant, string>;
 
   step(step: Step, previousSteps: Step[]): boolean
+  reset(): void
 }

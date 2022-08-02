@@ -17,40 +17,10 @@ export default class SupplyChainConformance implements Conformance {
     this.tokenState[0] = 1;
   }
 
-  /**
-   * Check that @param taskID is the valid next move considering @param tokenState.
-   * If not @return false
-   */
-  task(tokenState: number[], taskID: number): number[] {
-    if (taskID === 2 || taskID === 4 || taskID === 6 || taskID > 12) {
-      // only used for internal orchestration
-      return tokenState;
-    }
-    
-    const oldTokenState = [...tokenState];
-    // AND branch
-    if (tokenState[2] === 1) {
-      // enable both AND branches
-      tokenState[3] = 1;
-      tokenState[5] = 1;
-      tokenState[2] = 0;
-    }
-    if (tokenState[4] === 1 && tokenState[6] === 1) {
-      // join AND branch
-      tokenState[4] = 0;
-      tokenState[6] = 0;
-      tokenState[7] = 1;
-    }
-    if (tokenState[taskID] === 0) {
-      return oldTokenState;
-    }
-
-    // advance token state by consuming and producing tokens
-    // consume token(s)
-    tokenState[taskID] = 0;
-    // produce tokens
-    tokenState[taskID + 1] = 1;
-    return tokenState;
+  reset() {
+    this.tokenState = Array<number>(14).fill(0);
+    this.steps = new Array<Step>(14);
+    this.tokenState[0] = 1;
   }
 
   /**
@@ -82,7 +52,7 @@ export default class SupplyChainConformance implements Conformance {
           // Check and replay them
           if (prevSteps[index].taskID == index && this.checkStep(prevSteps[index])) {
             this.steps[index] = prevSteps[index];
-            this.tokenState = this.task(
+            this.tokenState = SupplyChainConformance.task(
               this.tokenState, 
               prevSteps[index].taskID
             );
@@ -111,7 +81,7 @@ export default class SupplyChainConformance implements Conformance {
     if (this.checkStep(step)) {
       //console.log(`add next step ${step.taskID} to previous steps`);
       this.steps[step.taskID] = step;
-      this.tokenState = this.task(this.tokenState, step.taskID);
+      this.tokenState = SupplyChainConformance.task(this.tokenState, step.taskID);
       return true;
     }
 
@@ -123,7 +93,7 @@ export default class SupplyChainConformance implements Conformance {
       return false;
     }
     // is it actually their turn?
-    if (!this.checkRouting(step.from, step.taskID)) {
+    if (SupplyChainConformance.routing(step.taskID) !== step.from) {
       return false;
     }
 
@@ -134,7 +104,7 @@ export default class SupplyChainConformance implements Conformance {
 
     // Is it the right turn? TODO: Move to top?
     if (
-      JSON.stringify([...this.tokenState]) !== JSON.stringify(this.task(
+      JSON.stringify([...this.tokenState]) !== JSON.stringify(SupplyChainConformance.task(
         [...this.tokenState], 
         step.taskID
       ))
@@ -145,7 +115,43 @@ export default class SupplyChainConformance implements Conformance {
     return false;
   }
 
-  checkRouting(from: Participant, taskID: number): boolean {
+  /**
+   * Check that @param taskID is the valid next move considering @param tokenState.
+   * If not @return false
+   */
+   static task(tokenState: number[], taskID: number): number[] {
+    if (taskID === 2 || taskID === 4 || taskID === 6 || taskID > 12) {
+      // only used for internal orchestration
+      return tokenState;
+    }
+    
+    const oldTokenState = [...tokenState];
+    // AND branch
+    if (tokenState[2] === 1) {
+      // enable both AND branches
+      tokenState[3] = 1;
+      tokenState[5] = 1;
+      tokenState[2] = 0;
+    }
+    if (tokenState[4] === 1 && tokenState[6] === 1) {
+      // join AND branch
+      tokenState[4] = 0;
+      tokenState[6] = 0;
+      tokenState[7] = 1;
+    }
+    if (tokenState[taskID] === 0) {
+      return oldTokenState;
+    }
+
+    // advance token state by consuming and producing tokens
+    // consume token(s)
+    tokenState[taskID] = 0;
+    // produce tokens
+    tokenState[taskID + 1] = 1;
+    return tokenState;
+  }
+
+  static routing(taskID: number): number {
     let required;
     switch (taskID) {
       case 0:
@@ -169,8 +175,8 @@ export default class SupplyChainConformance implements Conformance {
         required = Participant.Supplier
         break;
       default:
-        return false;
+        return -99;
     }
-    return required === from;
+    return required;
   }
 }

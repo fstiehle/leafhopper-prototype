@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import SupplyChainRootArtifact from '../../contracts/artifacts/contracts/SupplyChainRoot.sol/SupplyChainRoot.json';
+import SupplyChainRootArtifact from '../../contracts/artifacts/src/SupplyChainRoot.sol/SupplyChainRoot.json';
 import { SupplyChainRoot } from '../../contracts/typechain/SupplyChainRoot';
 import { Wallet } from './Identity';
 import Step from './Step';
@@ -12,13 +12,22 @@ type Provider = ethers.providers.Provider;
 export default class Oracle {
 
   contract: SupplyChainRoot;
+  wallet: Wallet;
+  providers: Provider[];
 
   constructor(address: string, wallet: Wallet, providers: Provider[]) {
+    console.log("Attach contract at:", address);
     if (!address) { return; }
-    this.contract = new ethers.Contract(
+    this.wallet = wallet;
+    this.providers = providers;
+    this.contract = this.attach(address);
+  }
+
+  attach(address: string) {
+    return new ethers.Contract(
       address, 
       SupplyChainRootArtifact.abi, 
-      wallet.connect(new ethers.providers.FallbackProvider(providers))
+      this.wallet.connect(new ethers.providers.FallbackProvider(this.providers))
     ) as SupplyChainRoot;
   }
 
@@ -26,16 +35,18 @@ export default class Oracle {
     return this.contract.isDisputed();
   }
 
-  async dispute(steps: Step[]): Promise<boolean> {
+  async dispute(steps: any): Promise<boolean> {
     const tx = await this.contract.dispute(steps);
     const receipt = await tx.wait(CONFIRMATION_BLOCKS);
-    if (receipt.events?.filter((x) => {return x.event == DISPUTE_EVENT})) { return true }
+    console.log('BENCHMARK Gas used for dispute(): ', receipt.gasUsed.toString())
+    if (receipt.events?.filter((x) => {return x.event === DISPUTE_EVENT}).length > 0) { return true }
     return false;
   }
 
-  async state(steps: Step[]): Promise<boolean> {
+  async state(steps: any): Promise<boolean> {
     const tx = await this.contract.state(steps);
     const receipt = await tx.wait(CONFIRMATION_BLOCKS);
+    console.log('BENCHMARK Gas used for step(): ', receipt.gasUsed.toString())
     return receipt.status !== 0;
   }
 }

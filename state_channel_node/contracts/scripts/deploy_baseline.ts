@@ -3,7 +3,7 @@ import { ethers } from 'hardhat';
 
 (async () => {
 
-  const factory = await ethers.getContractFactory('SupplyChainRoot');
+  const factory = await ethers.getContractFactory('SupplyChain');
 
   const supplyChainRoot = await factory.deploy(
     leafhopper.participants[0].address,

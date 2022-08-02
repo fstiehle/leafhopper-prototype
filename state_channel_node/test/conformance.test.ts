@@ -151,7 +151,7 @@ describe('Dry test conformance check functions', () => {
       for (const taskID of trace) {
         const prevtokenState = [...tokenState];
         expect(
-          conformance.task(tokenState, taskID)
+          SupplyChainConformance.task(tokenState, taskID)
           ).to.not.eql(prevtokenState)
       }
       const endState = Array<number>(14).fill(0);
@@ -165,7 +165,7 @@ describe('Dry test conformance check functions', () => {
     for (const trace of traces.nonConforming) {
       const tokenState: number[] = [...conformance.tokenState];
       for (const taskID of trace) {
-        conformance.task(tokenState, taskID);
+        SupplyChainConformance.task(tokenState, taskID);
       }
       const endState = Array<number>(14).fill(0);
       endState[13] = 1;
@@ -176,11 +176,11 @@ describe('Dry test conformance check functions', () => {
 
   it('try to submit a task twice', (done) => {
     const tokenState: number[] = [...conformance.tokenState];
-    conformance.task(tokenState, 0);
-    conformance.task(tokenState, 1);
+    SupplyChainConformance.task(tokenState, 0);
+    SupplyChainConformance.task(tokenState, 1);
     const prevtokenState = [...tokenState];
     expect(
-      conformance.task(tokenState, 1)
+      SupplyChainConformance.task(tokenState, 1)
     ).to.eql(prevtokenState);
     done();
   });

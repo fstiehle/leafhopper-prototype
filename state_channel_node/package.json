@@ -8,12 +8,14 @@
     "prekeygen": "npm run build",
     "keygen": "node dist/state-channel-node/keys/_keygen.script.js",
     "lint": "eslint . --ext .ts",
-    "build": "eslint . --ext .ts && rimraf dist && tsc",
+    "build": "eslint . --ext .ts && rimraf dist && tsc && ncp .env dist/.env",
     "preserve": "npm run build",
     "serve": "nodemon src/app.ts",
     "prestart": "npm run build",
     "start": "node dist/src/app.js",
-    "test": "mocha -r ts-node/register test/**/*.ts --timeout 10000"
+    "test": "mocha -r ts-node/register test/**/*.ts --timeout 10000",
+    "benchmark/cost": "node dist/benchmark/cost.js",
+    "prebenchmark/cost": "npm run build"
   },
   "devDependencies": {
     "@types/chai": "^4.3.1",

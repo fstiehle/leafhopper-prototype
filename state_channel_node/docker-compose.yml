@@ -5,33 +5,38 @@ services:
     ports:
       - "8000:8080"
     environment:
+      APP_ADDRESS_CONTRACT: ${ROOT}
       APP_IDENTITY: 0
-      APP_MNEMONIC: "bottom century muffin success mask duck brief wet soap harbor inch point"
+      APP_MNEMONIC: "decline fantasy twist absent spike life shoe split that brush dutch record"
   manufacturer:
     build: .
     ports:
       - "8001:8080"
     environment:
+      APP_ADDRESS_CONTRACT: ${ROOT}
       APP_IDENTITY: 1
-      APP_MNEMONIC: "bottom century muffin success mask duck brief wet soap harbor inch point"
+      APP_MNEMONIC: "festival enroll attitude prepare throw insect drink dinosaur middle voice gold fault"
   middleman:
     build: .
     ports:
       - "8002:8080"
     environment:
+      APP_ADDRESS_CONTRACT: ${ROOT}
       APP_IDENTITY: 2
-      APP_MNEMONIC: "bottom century muffin success mask duck brief wet soap harbor inch point"
+      APP_MNEMONIC: "festival iron churn learn alcohol joke add sunset position park melt recycle"
   supplier:
     build: .
     ports:
       - "8003:8080"
     environment:
+      APP_ADDRESS_CONTRACT: ${ROOT}
       APP_IDENTITY: 3
-      APP_MNEMONIC: "bottom century muffin success mask duck brief wet soap harbor inch point"
+      APP_MNEMONIC: "bind craft broken bachelor imitate alcohol lamp pizza gate ten tag erode"
   specialcarrier:
     build: .
     ports:
       - "8004:8080"
     environment:
+      APP_ADDRESS_CONTRACT: ${ROOT}
       APP_IDENTITY: 4
-      APP_MNEMONIC: "bottom century muffin success mask duck brief wet soap harbor inch point"
+      APP_MNEMONIC: "item begin absurd result crawl purse vibrant salt below dash sketch refuse"

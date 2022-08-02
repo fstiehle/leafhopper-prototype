@@ -1,6 +1,4 @@
-require('dotenv').config();
-
-import {task, HardhatUserConfig} from 'hardhat/config';
+import { HardhatUserConfig } from 'hardhat/config';
 import '@typechain/hardhat';
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-waffle';
@@ -8,28 +6,39 @@ import '@nomiclabs/hardhat-solhint';
 import 'solidity-coverage';
 import '@nomiclabs/hardhat-etherscan';
 
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
-  const accounts = await hre.ethers.getSigners();
-
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
+import { ethers } from 'ethers';
+import leafhopper from '../leafhopper.config'
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 const config: HardhatUserConfig = {
   solidity: '0.8.9',
+  defaultNetwork: leafhopper.contract.deployTo.network,
   networks: {
-    rinkeby: {
-      url: process.env.RENKEBY_URL || '',
-      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    hardhat: {
+      accounts: [
+        leafhopper.contract.deployFrom.mnemonic,
+        ...leafhopper.participants.flatMap((p) => p.test_mnemonic)
+      ] 
+      .flatMap(m => { return { privateKey: ethers.Wallet.fromMnemonic(m).privateKey, balance: Math.pow(10, 18).toString() }}) 
     },
+    localhost: {
+      url: "http://127.0.0.1:8545",
+    },
+    rinkeby: {
+      url: "https://api-rinkeby.etherscan.io/",
+      accounts: {
+        mnemonic: leafhopper.contract.deployFrom.mnemonic
+      }
+    }
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    // Your API key for Etherscan
+    // Obtain one at https://etherscan.io/
+    apiKey: leafhopper.contract.apikeys.etherscan
+  },
+  paths: {
+    sources: "./src"
   },
 };
 

@@ -1,14 +1,15 @@
 {
-  "name": "solidity-hardhat-template",
-  "version": "1.0.0",
+  "name": "leafhopper-contracts",
+  "version": "0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
+    "gen_wallets": "npx hardhat run scripts/gen_wallets.ts",
     "clean": "npx hardhat clean",
     "build": "npm run clean && npx hardhat compile",
     "chain": "npx hardhat node",
-    "deploy": "npx hardhat run --network localhost scripts/deploy.ts",
-    "deploy:rinkeby": "npx hardhat run --network rinkeby scripts/deploy.ts",
+    "deploy": "npx hardhat run scripts/deploy.ts",
+    "deploy:baseline": "npx hardhat run scripts/deploy_baseline.ts",
     "test": "npx hardhat test",
     "coverage": "hardhat coverage --solcoverjs ./.solcover.js --temp artifacts --testfiles \"./test/**/*.ts\""
   },
@@ -29,7 +30,6 @@
     "dotenv": "^10.0.0",
     "ethereum-waffle": "^3.0.0",
     "ethers": "^5.0.0",
-    "hardhat": "^2.8.3",
     "prettier": "^2.4.0",
     "prettier-plugin-solidity": "^1.0.0-beta.18",
     "solhint": "^3.3.6",
@@ -37,10 +37,12 @@
     "solidity-coverage": "^0.7.18",
     "ts-node": "^10.2.1",
     "typechain": "^5.1.2",
-    "typescript": "^4.5.5"
+    "typescript": "^4.5.5",
+    "hardhat": "^2.10.1"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.7.0",
+    "glob": "7.2.0",
     "web3": "^1.7.4"
   }
 }

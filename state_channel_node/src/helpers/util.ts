@@ -1,5 +1,4 @@
-import Participant from '../classes/Participant';
-import RoutingInformation from '../classes/RoutingInformation';
+import leafhopper from '../../leafhopper.config';
 import express, { Express, Request, Response, NextFunction } from 'express';
 import Identity from '../classes/Identity';
 import Routing from '../classes/Routing';
@@ -10,26 +9,36 @@ import stepRouter from '../routes/step.route';
 import disputeRouter from '../routes/dispute.route';
 import Oracle from '../classes/Oracle';
 import RequestServer from '../classes/RequestServer';
+import { ethers } from 'ethers';
+import Participant from '../classes/Participant';
+import RoutingInformation from '../classes/RoutingInformation';
 
-/**
- * @returns Participants involved in the supply chain use case, their public keys and routing information
- */
-const getParticipantsRoutingInformation = () => {
-  return new Map<Participant, RoutingInformation>([
-    [Participant.BulkBuyer, new RoutingInformation(Participant.BulkBuyer, 'localhost', 9001)],
-    [Participant.Manufacturer, new RoutingInformation(Participant.Manufacturer, 'localhost', 9002)],
-    [Participant.Middleman, new RoutingInformation(Participant.Middleman, 'localhost', 9003)],
-    [Participant.Supplier, new RoutingInformation(Participant.Supplier, 'localhost', 9004)],
-    [Participant.SpecialCarrier, new RoutingInformation(Participant.SpecialCarrier, 'localhost', 9005)],
-  ]);
+const getProvidersFromConfig = (contract : typeof leafhopper.contract) => {
+  const providers = new Array<ethers.providers.Provider>();
+  if (contract.deployTo.rpc) {
+    providers.push(new ethers.providers.JsonRpcProvider(contract.deployTo.rpc));
+  } else if (contract.apikeys.etherscan) {
+    providers.push(new ethers.providers.EtherscanProvider(contract.deployTo.network, contract.apikeys.etherscan));
+  } else {
+    providers.push(ethers.providers.getDefaultProvider(contract.deployTo.network));
+  }
+  return providers;
 }
 
-const getParticipantsKeys = (p: IterableIterator<Participant>) => {
-  const keys = new Map<Participant, string>();
-  for (const participant of p) {
-    keys.set(participant, process.env.APP_ADDRESS);
+const getParticipantsRoutingFromConfig = (participants : typeof leafhopper.participants) => {
+  const routing = new Map<Participant, RoutingInformation>();
+  for (const participant of leafhopper.participants) {
+    routing.set(participant.id, new RoutingInformation(participant.id, 'localhost', participant.port));
   }
-  return keys;
+  return routing;
+}
+
+const getParticipantsAddressFromConfig = (participants : typeof leafhopper.participants) => {
+  const address = new Map<Participant, string>();
+  for (const participant of leafhopper.participants) {
+    address.set(participant.id, participant.address);
+  }
+  return address;
 }
 
 /**
@@ -54,10 +63,11 @@ const getParticipantsKeys = (p: IterableIterator<Participant>) => {
   app.use('/begin', beginRouter(router, identity, conformance, routing, oracle, requestServer));
   app.use('/step', stepRouter(router, identity, conformance, oracle));
   app.use('/dispute', disputeRouter(router, conformance, oracle));
+  app.use('/start', disputeRouter(router, conformance, oracle));
 
   app.use((error: Error, _: Request, response: Response, next: NextFunction) => {
     const message = error.message || 'Something went wrong';
-    console.log('error', message);
+    console.error(message);
     response
       .status(500)
       .send(message);
@@ -73,7 +83,8 @@ const getParticipantsKeys = (p: IterableIterator<Participant>) => {
 }
 
 export {
-  getParticipantsRoutingInformation,
-  getParticipantsKeys,
+  getParticipantsAddressFromConfig,
+  getParticipantsRoutingFromConfig,
+  getProvidersFromConfig,
   configureServer
 }

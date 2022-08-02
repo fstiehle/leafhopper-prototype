@@ -3,7 +3,7 @@ pragma solidity ^0.8.9;
 
 import './StateChannelRoot.sol';
 import './SupplyChainConformance.sol';
-import 'hardhat/console.sol';
+// import 'hardhat/console.sol';
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 contract SupplyChainRoot is StateChannelRoot, SupplyChainConformance {
@@ -67,6 +67,7 @@ contract SupplyChainRoot is StateChannelRoot, SupplyChainConformance {
     function checkSteps(Step[] calldata steps) private returns (bool) {
         // i < recordedSteps.length-1 as the last event '13' is the end place,
         // which the smart contract decides on its own.
+        uint changes = 0;
         for (uint i = 0; i < steps.length && i < recordedSteps.length-1; i++) {
             if (i == 2 || i == 4 || i == 6) {
                 // only used for internal orchestration
@@ -76,7 +77,7 @@ contract SupplyChainRoot is StateChannelRoot, SupplyChainConformance {
             // Check steps and replay them
             if (recordedSteps[i].signature.length == 0) {
                 if (steps[i].signature.length > 0) {
-                    console.log("Unknwon Step with task id", i);
+                    // console.log("Unknwon Step with task id", i);
 
                     if (steps[i].taskID == i && check(steps[i])) {
                         recordedSteps[i] = steps[i];
@@ -84,6 +85,7 @@ contract SupplyChainRoot is StateChannelRoot, SupplyChainConformance {
                             tokenState,
                             steps[i].taskID
                         );
+                        changes++;
                     } else {
                         revert("Invalid step found.");
                     }
@@ -91,7 +93,7 @@ contract SupplyChainRoot is StateChannelRoot, SupplyChainConformance {
 
                 continue;
             }
-        
+
             // Do not verify already known steps, only compare they're equal.
             if (
                 keccak256(
@@ -118,18 +120,18 @@ contract SupplyChainRoot is StateChannelRoot, SupplyChainConformance {
             }
         }
 
-        return true;
+        return changes != 0;
     }
 
-    function check(Step calldata step) private returns (bool) {
-        console.log("Enter check step");
+    function check(Step calldata step) private view returns (bool) {
+        // console.log("Enter check step");
         // TODO: Check CaseID
 
         // Is it the right turn?
         if (this.task(tokenState, step.taskID) == tokenState) {
             return false;
         }
-        console.log("It is the right turn");
+        // console.log("It is the right turn");
 
         // Is it actually their turn?
         if (step.from >= participants.length) {
@@ -139,19 +141,18 @@ contract SupplyChainRoot is StateChannelRoot, SupplyChainConformance {
         if (turn >= participants.length || turn != step.from) {
             return false;
         }
-        console.log("It is indeed their turn");
+        // console.log("It is indeed their turn");
 
         // Is it actually from them?
         bytes32 payload = keccak256(
             abi.encode(step.caseID, step.from, step.taskID, step.salt)
         );
-        console.logBytes(abi.encodePacked(payload.toEthSignedMessageHash()));
         if (payload.toEthSignedMessageHash().recover(step.signature)
             == participants[uint(step.from)]
         ) {
             return true;
         }
-        console.log("Signatures do not match!");
+        // console.log("Signatures do not match!");
 
         return false;
     }
@@ -162,7 +163,7 @@ contract SupplyChainRoot is StateChannelRoot, SupplyChainConformance {
             || msg.sender == participants[uint(Participant.Middleman)]
             || msg.sender == participants[uint(Participant.Supplier)]
             || msg.sender == participants[uint(Participant.SpecialCarrier)], 
-            "only Participants");
+            "only for participants");
         _;
     }
 }

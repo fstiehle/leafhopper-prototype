@@ -1,15 +1,15 @@
 /// Make sure to call 'npm run build' first.
 /// Script used for key generation in the test environment.
 /// Thanks to: https://gist.github.com/fntlnz/cf14feb5a46b2eda428e000157447309
-
+import leafhopper from '../leafhopper.config';
 import { execSync } from "child_process";
 import RoutingInformation from "../src/classes/RoutingInformation";
-import { cwd } from 'process';
-import { getParticipantsRoutingInformation } from '../src/helpers/util';
+import { getParticipantsRoutingFromConfig } from '../src/helpers/util';
 
 const execute = (line: string) => {
+  console.log(line);
   try {
-    execSync(line, { cwd: cwd() + '/keys' });
+    console.log(execSync(line, { stdio: 'inherit', cwd: process.cwd() + '/keys' }));
   } catch(err) {
     console.log(err);
     return;
@@ -18,7 +18,7 @@ const execute = (line: string) => {
 
 console.log('Running script for key generation...');
 
-const participants = getParticipantsRoutingInformation();
+const participants = getParticipantsRoutingFromConfig(leafhopper.participants);
 
 execute("openssl genrsa -out rootCA.key 4096");
 execute(`openssl req -x509 -new -nodes -key rootCA.key -subj "/C=DE/ST=BW/O=leafhopper, GmbH./CN=leafhopper" -sha256 -days 365 -out rootCA.crt`);

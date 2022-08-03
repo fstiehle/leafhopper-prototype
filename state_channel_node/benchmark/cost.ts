@@ -4,7 +4,6 @@ import Replayer from './classes/Replayer';
 import { ethers } from 'ethers';
 import { getProvidersFromConfig } from '../src/helpers/util';
 import assert from 'assert';
-import Participant from '../src/classes/Participant';
 import { Wallet } from '../src/classes/Identity';
 import SupplyChainArtifact from '../contracts/artifacts/src/baseline/SupplyChain.sol/SupplyChain.json';
 import { SupplyChain } from '../contracts/typechain/SupplyChain';
@@ -25,40 +24,26 @@ const reset = async (replayer: Replayer) => {
 
 (async () => {
   const replayer = new Replayer();
-  const signers = new Map<Participant, Wallet>();
+  const signers = new Array<Wallet>();
   for (const p of leafhopper.participants) {
-    signers.set(p.id, ethers.Wallet.fromMnemonic(p.test_mnemonic));
+    signers[p.id] = ethers.Wallet.fromMnemonic(p.test_mnemonic);
   }
 
-  let oracle = await reset(replayer);
-  let steps = Replayer.getEmptySteps();
+  const oracle = await reset(replayer);
+  const tokenState = Replayer.getFreshTokenState();
+  let step;
 
   console.log("Assess cost of dispute ...");
   console.log("Worst case scenario");
   console.log("Dispute with one step");
-  steps = await Replayer.insertConformingStep(signers, steps, 0);
-  assert(true === await oracle.dispute(steps));
+  step = await Replayer.insertConformingStep(signers, 0, SupplyChainConformance.task(tokenState, 0));
+  assert(true === await oracle.dispute(step));
 
   console.log("Submit additional steps ...");
   for (let id = 1; id < 13; id++) {
     if (id === 2 || id === 4 || id === 6) continue;
-    steps = await Replayer.insertConformingStep(signers, steps, id);
-    assert(true === await oracle.state(steps)); 
-  }
-
-  console.log("Cost scaling of dispute")
-  let count = 0;
-  for (let i = 1; i < 13; i++) {
-    count = 0;
-    oracle = await reset(replayer);
-    steps = Replayer.getEmptySteps();
-    for (let j = 0; j < i; j++) {
-      if (j === 2 || j === 4 || j === 6) continue;
-      steps = await Replayer.insertConformingStep(signers, steps, j);
-      count++;
-    }
-    console.log("Cost of dispute with", count , 'steps');
-    assert(true === await oracle.dispute(steps));
+    step = await Replayer.insertConformingStep(signers, id, SupplyChainConformance.task(tokenState, id));
+    assert(true === await oracle.state(step)); 
   }
 
   console.log("Cost of baseline")

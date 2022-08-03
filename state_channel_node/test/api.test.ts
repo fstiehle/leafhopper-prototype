@@ -13,6 +13,8 @@ import SupplyChainConformance from '../src/classes/SupplyChainConformance';
 import { Server } from 'node:http';
 import Oracle from '../src/classes/Oracle';
 import RequestServer from '../src/classes/RequestServer';
+import { doesNotMatch } from 'assert';
+import { resolve } from 'path';
 const {expect} = chai;
 
 chai.use(chaiHttp);
@@ -35,12 +37,13 @@ describe('/begin and /step', () => {
     } catch (err) {
       console.error(err);
     }
+  })
 
+  beforeEach(() => {
     servers = new Map<Participant, Server>();
     keys = new Map<Participant, ethers.Wallet>();
     const pubKeys = new Map<Participant, string>();
     for (const [participant, routingInformation] of participants) {
-
       let sK, cert;
       try {
         sK = fs.readFileSync('./keys/' + participant + '.key').toString();
@@ -71,7 +74,7 @@ describe('/begin and /step', () => {
     }
   })
 
-  after(() => {
+  afterEach(() => {
     for (const [_, server] of servers) {
       server.close();
     }
@@ -79,11 +82,15 @@ describe('/begin and /step', () => {
 
   it('test with conforming behaviour', async () => {
     // Bulk Buyer to Manufacturer
+    let prevStep;
     await chai.request('https://localhost:' + participants.get(Participant.BulkBuyer).port)
-      .get('/begin/0')
+      .post('/begin/0')
       .ca(Buffer.from(rootCA))
+      .set('content-type', 'application/json')
       .then(res => {
         expect(res).to.have.status(200);
+        expect(res.body).to.have.property('signature');
+        prevStep = res.body;
       })
       .catch(err => {
         console.log(err);
@@ -92,10 +99,13 @@ describe('/begin and /step', () => {
 
     // Manufacturer to Middleman
     await chai.request('https://localhost:' + participants.get(Participant.Manufacturer).port)
-      .get('/begin/1')
+      .post('/begin/1')
       .ca(Buffer.from(rootCA))
+      .set('content-type', 'application/json')
+      .send(prevStep)
       .then(res => {
         expect(res).to.have.status(200);
+        prevStep = res.body;
       })
       .catch(err => {
         expect(err).to.be.null;
@@ -104,10 +114,13 @@ describe('/begin and /step', () => {
 
     // Middleman to Supplier
     await chai.request('https://localhost:' + participants.get(Participant.Middleman).port)
-    .get('/begin/3')
+    .post('/begin/3')
     .ca(Buffer.from(rootCA))
+    .set('content-type', 'application/json')
+    .send(prevStep)
     .then(res => {
       expect(res).to.have.status(200);
+      prevStep = res.body;
     })
     .catch(err => {
       expect(err).to.be.null;
@@ -116,10 +129,13 @@ describe('/begin and /step', () => {
 
     // Middleman to SpecialCarrier
     await chai.request('https://localhost:' + participants.get(Participant.Middleman).port)
-    .get('/begin/5')
+    .post('/begin/5')
     .ca(Buffer.from(rootCA))
+    .set('content-type', 'application/json')
+    .send(prevStep)
     .then(res => {
       expect(res).to.have.status(200);
+      prevStep = res.body;
     })
     .catch(err => {
       expect(err).to.be.null;
@@ -128,10 +144,76 @@ describe('/begin and /step', () => {
 
     // SpecialCarrier to Supplier
     await chai.request('https://localhost:' + participants.get(Participant.SpecialCarrier).port)
-    .get('/begin/7')
+    .post('/begin/7')
     .ca(Buffer.from(rootCA))
+    .set('content-type', 'application/json')
+    .send(prevStep)
     .then(res => {
       expect(res).to.have.status(200);
+      prevStep = res.body;
+    })
+    .catch(err => {
+      expect(err).to.be.null;
+      console.log(err);
+    });
+  });
+
+  it('test with non-conforming behaviour', async () => {
+    // Bulk Buyer to Manufacturer
+    let prevStep;
+    await chai.request('https://localhost:' + participants.get(Participant.BulkBuyer).port)
+      .post('/begin/0')
+      .ca(Buffer.from(rootCA))
+      .then(res => {
+        expect(res).to.have.status(200);
+        prevStep = res.body;
+      })
+      .catch(err => {
+        console.log(err);
+        expect(err).to.be.null;
+     });
+
+    // Manufacturer to Middleman
+    await chai.request('https://localhost:' + participants.get(Participant.Manufacturer).port)
+      .post('/begin/1')
+      .ca(Buffer.from(rootCA))
+      .set('content-type', 'application/json')
+      .send(prevStep)
+      .then(res => {
+        expect(res).to.have.status(200);
+        prevStep = res.body;
+      })
+      .catch(err => {
+        expect(err).to.be.null;
+        console.log(err);
+     });
+
+    // Middleman to Supplier
+    // Skip
+
+    // Middleman to SpecialCarrier
+    await chai.request('https://localhost:' + participants.get(Participant.Middleman).port)
+    .post('/begin/5')
+    .ca(Buffer.from(rootCA))
+    .set('content-type', 'application/json')
+    .send(prevStep)
+    .then(res => {
+      expect(res).to.have.status(200);
+      prevStep = res.body;
+    })
+    .catch(err => {
+      expect(err).to.be.null;
+      console.log(err);
+    });
+
+    // SpecialCarrier to Supplier
+    await chai.request('https://localhost:' + participants.get(Participant.SpecialCarrier).port)
+    .post('/begin/7')
+    .ca(Buffer.from(rootCA))
+    .set('content-type', 'application/json')
+    .send(prevStep)
+    .then(res => {
+      expect(res).to.have.status(500);
     })
     .catch(err => {
       expect(err).to.be.null;

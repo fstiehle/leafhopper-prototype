@@ -14,7 +14,7 @@ const begin = (
   oracle: Oracle,
   requestServer: RequestServer
   ): Router => {
-  router.get('/:id([0-9]+)', controller(identity, conformance, flow, oracle, requestServer));
+  router.post('/:id([0-9]+)', controller(identity, conformance, flow, oracle, requestServer));
   return router;
 }
 

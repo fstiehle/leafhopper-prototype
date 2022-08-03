@@ -29,13 +29,18 @@ const getNewConformanceService = (participants: Map<Participant, string>) => {
   return new SupplyChainConformance(participants);
 }
 
-const getNewStep = async (from: Participant, taskID: number) => {
+const getNewStep = async (
+  from: Participant,
+  conformance: SupplyChainConformance, 
+  taskID: number
+  ) => {
   const step = new Step({
     from,
     taskID,
-    caseID: 0
+    caseID: 0,
+    newTokenState: SupplyChainConformance.task(conformance.tokenState, taskID)
   });
-  await step.sign(keys.get(from));
+  await step.sign(keys.get(from), from);
   return step;
 }
 
@@ -44,105 +49,6 @@ describe('Dry test conformance check functions', () => {
 
   beforeEach(() => {
     conformance = getNewConformanceService(pubKeys);
-  });
-
-  it('test conforming steps, where the middleman sends the message first to the supplier', async () => {
-    let nextStep = await getNewStep(Participant.BulkBuyer, 0);
-    const manufacturer = getNewConformanceService(pubKeys);
-    // Bulk Buyer to Manufacturer
-    expect(manufacturer.checkStep(nextStep), "test checkStep").to.be.true
-    expect(manufacturer.step(nextStep, []), "0: Bulk Buyer to Manufacturer").to.be.true;
-
-    // Manufacturer to Middleman
-    nextStep = await getNewStep(Participant.Manufacturer, 1);
-    const middleman = getNewConformanceService(pubKeys);
-    expect(middleman.step(nextStep, manufacturer.steps), "1: Manufacturer to Middleman").to.be.true;
-
-    // Middleman to Supplier
-    nextStep = await getNewStep(Participant.Middleman, 3);
-
-    const supplier = getNewConformanceService(pubKeys);
-    expect(supplier.step(nextStep, middleman.steps), "3: Middleman to Supplier").to.be.true;
-
-    // Middleman has to wait for his ack so the step can be added before 
-    // it is submitted to the special carrier
-    // Middleman to Special Carrier
-    nextStep = await getNewStep(Participant.Middleman, 5);
-
-    const specialCarrier = getNewConformanceService(pubKeys);
-    expect(specialCarrier.step(nextStep, middleman.steps), "5: Middleman to Special Carrier").to.be.true;
-
-    // SpecialCarrier to Supplier
-    nextStep = await getNewStep(Participant.SpecialCarrier, 7);
-    expect(supplier.step(nextStep, specialCarrier.steps), "7: SpecialCarrier to Supplier").to.be.true;
-  });
-
-  it('test conforming steps, where the middleman sends the message first to the special carrier', async () => {
-    let nextStep = await getNewStep(Participant.BulkBuyer, 0);
-    const manufacturer = getNewConformanceService(pubKeys);
-    // Bulk Buyer to Manufacturer
-    expect(manufacturer.checkStep(nextStep), "test checkStep").to.be.true
-    expect(manufacturer.step(nextStep, []), "0: Bulk Buyer to Manufacturer").to.be.true;
-
-    // Manufacturer to Middleman
-    nextStep = await getNewStep(Participant.Manufacturer, 1);
-    const middleman = getNewConformanceService(pubKeys);
-    expect(middleman.step(nextStep, manufacturer.steps), "1: Manufacturer to Middleman").to.be.true;
-
-    // Middleman to Special Carrier
-    nextStep = await getNewStep(Participant.Middleman, 5);
-    const specialCarrier = getNewConformanceService(pubKeys);
-    expect(specialCarrier.step(nextStep, middleman.steps), "5: Middleman to Special Carrier").to.be.true;
-
-    // Middleman to Supplier
-    nextStep = await getNewStep(Participant.Middleman, 3);
-    const supplier = getNewConformanceService(pubKeys);
-    expect(supplier.step(nextStep, middleman.steps), "3: Middleman to Supplier").to.be.true;
-
-    // SpecialCarrier to Supplier
-    nextStep = await getNewStep(Participant.SpecialCarrier, 7);
-
-    expect(supplier.step(nextStep, specialCarrier.steps), "7: SpecialCarrier to Supplier").to.be.true;
-
-    // Supplier to SpecialCarrier
-    nextStep = await getNewStep(Participant.Supplier, 8);
-    expect(specialCarrier.step(nextStep, supplier.steps), "8: Supplier to SpecialCarrier").to.be.true;
-  });
-
-  it('test non-conforming steps, where the supplier or the special carrier try to hide their involvement', async () => {
-    let nextStep = await getNewStep(Participant.BulkBuyer, 0);
-    const manufacturer = getNewConformanceService(pubKeys);
-    // Bulk Buyer to Manufacturer
-    expect(manufacturer.checkStep(nextStep), "test checkStep").to.be.true
-    expect(manufacturer.step(nextStep, []), "0: Bulk Buyer to Manufacturer").to.be.true;
-
-    // Manufacturer to Middleman
-    nextStep = await getNewStep(Participant.Manufacturer, 1);
-    const middleman = getNewConformanceService(pubKeys);
-    expect(middleman.step(nextStep, manufacturer.steps), "1: Manufacturer to Middleman").to.be.true;
-
-    // Middleman to Special Carrier
-    nextStep = await getNewStep(Participant.Middleman, 5);
-
-    const specialCarrier = getNewConformanceService(pubKeys);
-    expect(specialCarrier.step(nextStep, middleman.steps), "5: Middleman to Special Carrier").to.be.true;
-
-    // Middleman to Supplier
-    nextStep = await getNewStep(Participant.Middleman, 3);
-    const supplier = getNewConformanceService(pubKeys);
-    expect(supplier.step(nextStep, middleman.steps), "3: Middleman to Supplier").to.be.true;
-
-    // SpecialCarrier to Supplier
-    // SpecialCarrier tries to hide his involvement in the AND Fork
-    specialCarrier.steps[5] = undefined;
-    nextStep = await getNewStep(Participant.SpecialCarrier, 7);
-    expect(supplier.step(nextStep, specialCarrier.steps), "7: SpecialCarrier to Supplier").to.be.false;
-
-    // Supplier to SpecialCarrier
-    // Now, Supplier tries to hide his involvement in the AND Fork
-    nextStep = await getNewStep(Participant.Supplier, 8);
-    supplier.steps[3] = undefined;
-    expect(specialCarrier.step(nextStep, supplier.steps), "7: SpecialCarrier to Supplier").to.be.false;
   });
 
   it('test token game by replaying conforming traces', (done) => {

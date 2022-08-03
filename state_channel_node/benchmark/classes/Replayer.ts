@@ -47,26 +47,23 @@ export default class Replayer {
     }
   }
 
-  static async insertConformingStep(signers: Map<Participant, Wallet>, steps: Step[], taskID: number) {
-    steps[taskID] = new Step({
+  static async insertConformingStep(signers: Array<Wallet>, taskID: number, newTokenState: number[]) {
+    const step = new Step({
       from: SupplyChainConformance.routing(taskID),
       caseID: 0,
-      taskID: taskID
+      taskID: taskID,
+      newTokenState: newTokenState
     })
-    await steps[taskID].sign(signers.get(SupplyChainConformance.routing(taskID)));
-    return steps;
+    signers.forEach(async (signer, index) => {
+      await step.sign(signer, index);
+    });    
+    return step;
   }
 
-  static getEmptySteps() {
-    const steps: Step[] = new Array<Step>();
-    for (let index = 0; index < 14; index++) {
-      steps.push(new Step({
-        from: 0,
-        caseID: 0,
-        taskID: 0
-      }))
-    }
-    return steps;
+  static getFreshTokenState() {
+    const tokenState = new Array<number>(14).fill(0);
+    tokenState[0] = 1;
+    return tokenState;
   }
 
   dispute(participant: Participant) {

@@ -11,18 +11,8 @@ contract SupplyChain is SupplyChainConformance {
     event NonConformingTrace(uint id);
     event EndEvent();
 
-    constructor(
-        address bulkBuyer,
-        address manufacturer,
-        address middleman,
-        address supplier,
-        address specialCarrier
-    ) {
-        participants[uint(Participant.BulkBuyer)] = bulkBuyer;
-        participants[uint(Participant.Manufacturer)] = manufacturer;
-        participants[uint(Participant.Middleman)] = middleman;
-        participants[uint(Participant.Supplier)] = supplier;
-        participants[uint(Participant.SpecialCarrier)] = specialCarrier;
+    constructor(address[5] memory _participants) {
+       participants = _participants;
     }
 
     /// Advance the state of the contract after a conformance check
@@ -60,11 +50,11 @@ contract SupplyChain is SupplyChainConformance {
     }
 
     modifier onlyParticipants {
-        require (msg.sender == participants[uint(Participant.BulkBuyer)] 
-            || msg.sender == participants[uint(Participant.Manufacturer)]
-            || msg.sender == participants[uint(Participant.Middleman)]
-            || msg.sender == participants[uint(Participant.Supplier)]
-            || msg.sender == participants[uint(Participant.SpecialCarrier)], 
+        require (msg.sender == participants[0] 
+            || msg.sender == participants[1]
+            || msg.sender == participants[2]
+            || msg.sender == participants[3]
+            || msg.sender == participants[4], 
             "only for participants");
         _;
     }

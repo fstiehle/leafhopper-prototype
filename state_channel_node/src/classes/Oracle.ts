@@ -32,19 +32,19 @@ export default class Oracle {
   }
 
   isDisputed(): Promise<boolean> {
-    return this.contract.isDisputed();
+    return this.contract.disputed();
   }
 
-  async dispute(steps: any): Promise<boolean> {
-    const tx = await this.contract.dispute(steps);
+  async dispute(step: Step): Promise<boolean> {
+    const tx = await this.contract.dispute(step.getBlockchainFormat());
     const receipt = await tx.wait(CONFIRMATION_BLOCKS);
     console.log('BENCHMARK Gas used for dispute(): ', receipt.gasUsed.toString())
     if (receipt.events?.filter((x) => {return x.event === DISPUTE_EVENT}).length > 0) { return true }
     return false;
   }
 
-  async state(steps: any): Promise<boolean> {
-    const tx = await this.contract.state(steps);
+  async state(step: Step): Promise<boolean> {
+    const tx = await this.contract.state(step.getBlockchainFormat());
     const receipt = await tx.wait(CONFIRMATION_BLOCKS);
     console.log('BENCHMARK Gas used for step(): ', receipt.gasUsed.toString())
     return receipt.status !== 0;

@@ -28,13 +28,14 @@ export default class RequestServer {
         });
   
         res.on('end', () => {
-          if (res.statusCode !== 200)
-            return reject(new Error(`Error when trying to reach next participant: ${res.statusCode} ${res.statusMessage}`));
-  
-          try {
-            resolve(JSON.parse(responseBody));
-          } catch (error) {
-            throw new Error(error);
+          if (res.statusCode !== 200) {
+            reject(new Error(`Error when trying to reach next participant: ${res.statusCode} ${res.statusMessage}`));
+          } else {
+            try {
+              resolve(JSON.parse(responseBody));
+            } catch (error) {
+              reject(new Error(error));
+            }
           }
         });
       });

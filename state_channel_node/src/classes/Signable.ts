@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import {ethers} from 'ethers';
 import {Wallet} from './Identity';
+import Participant from './Participant';
 
 export interface SignablePart {
   types: string[];
@@ -9,16 +10,16 @@ export interface SignablePart {
 
 export default abstract class Signable {
   salt = "";
-  signature = "";
+  signature = new Array<string>();
 
   abstract getSignablePart(withSignature?: boolean): SignablePart;
 
-  async sign(wallet: Wallet) {
-    this.salt = '0x' + crypto.randomBytes(16).toString('hex');
+  async sign(wallet: Wallet, signee: Participant) {
+    this.salt = this.salt ? this.salt : '0x' + crypto.randomBytes(16).toString('hex');
     const signable = this.getSignablePart();
     const encoder = new ethers.utils.AbiCoder();
     try {
-      this.signature = await wallet.signMessage(
+      this.signature[signee] = await wallet.signMessage(
         ethers.utils.arrayify(
           ethers.utils.keccak256(
             encoder.encode(signable.types, signable.value)
@@ -26,11 +27,11 @@ export default abstract class Signable {
         )
       );
     } catch (err) {
-      console.error(err);
+      console.error('sign error', err);
     }
   }
 
-  verifySignature(expectedAddress: string): boolean {
+  verifySignature(expectedAddress: string, signature: string): boolean {
     const signable = this.getSignablePart();
     const encoder = new ethers.utils.AbiCoder;
     let address;
@@ -41,10 +42,10 @@ export default abstract class Signable {
             encoder.encode(signable.types, signable.value)
           )
         ),
-        this.signature
+        signature
       )
     } catch (err) {
-      console.error(err);
+      console.error('verify sign error', err);
     }
     return expectedAddress === address;
   }

@@ -6,11 +6,13 @@ import { ethers } from 'hardhat';
   const factory = await ethers.getContractFactory('SupplyChainRoot');
 
   const supplyChainRoot = await factory.deploy(
-    leafhopper.participants[0].address,
-    leafhopper.participants[1].address,
-    leafhopper.participants[2].address,
-    leafhopper.participants[3].address,
-    leafhopper.participants[4].address
+    [
+      leafhopper.participants[0].address,
+      leafhopper.participants[1].address,
+      leafhopper.participants[2].address,
+      leafhopper.participants[3].address,
+      leafhopper.participants[4].address
+    ]
   );
 
   const receipt = await supplyChainRoot.deployTransaction.wait(1);

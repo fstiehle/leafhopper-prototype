@@ -7,13 +7,8 @@ interface StateChannelType {
     uint from;
     uint caseID;
     uint taskID;
+    uint newTokenState;
     bytes16 salt;
-    bytes signature;
-  }
-
-  struct Ack {
-    Step step;
-    bytes16 salt;
-    bytes signature;
+    bytes[] signature;
   }
 }

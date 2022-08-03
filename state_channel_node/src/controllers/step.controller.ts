@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
+import Step from '../classes/Step';
 import ConformanceCheck from '../classes/Conformance';
 import Identity from '../classes/Identity';
-import StepMessage from '../classes/StepMessage';
 import Oracle from '../classes/Oracle';
 
 /**
@@ -18,21 +18,20 @@ const step = (identity: Identity, conformance: ConformanceCheck, oracle: Oracle)
       return next();
     }
 
-    const stepMessage = new StepMessage().fromJSON(req.body);
-    if (!stepMessage?.step || !stepMessage?.prevSteps) {
-      console.error(`Malformed JSON: ${JSON.stringify(req.body)} to ${JSON.stringify(stepMessage)}`);
-      res.status(400).send("Malformed JSON");
-      return next();
+    const receivedStep = new Step(req.body.step);
+    if (!receivedStep) {
+      return next(new Error(`Malformed JSON: ${JSON.stringify(req.body)} to ${JSON.stringify(receivedStep)}`));
     }
 
     // Send signed ACK or error back
-    if (!conformance.step(stepMessage.step, stepMessage.prevSteps)) {
+    if (!conformance.step(receivedStep)) {
       res.status(403).send("Non-conforming behaviour");
       return next();
     }
-    
-    await stepMessage.sign(identity.wallet);
-    res.status(200).send(JSON.stringify(stepMessage))
+
+    await receivedStep.sign(identity.wallet, identity.me);
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).send(JSON.stringify(receivedStep));
     return next();
   }
 }

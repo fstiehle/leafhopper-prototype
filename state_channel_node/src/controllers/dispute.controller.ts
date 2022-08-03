@@ -20,7 +20,7 @@ const dispute = (conformance: ConformanceCheck, oracle: Oracle) => {
     if (await oracle.isDisputed()) {
 
       console.log('Dispute is already raised.');
-      if (await oracle.state(conformance.steps)) {
+      if (await oracle.state(conformance.steps[conformance.lastCheckpoint])) {
         res.sendStatus(200);
         return next();
       }
@@ -29,7 +29,7 @@ const dispute = (conformance: ConformanceCheck, oracle: Oracle) => {
 
     } else {
 
-      if (await oracle.dispute(conformance.steps)) {
+      if (await oracle.dispute(conformance.steps[conformance.lastCheckpoint])) {
         res.sendStatus(200);
         return next();
       }

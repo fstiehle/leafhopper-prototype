@@ -10,65 +10,59 @@ const {deployContract} = waffle;
 const {expect} = chai;
 
 describe('SupplyChain Contract', () => {
-  let owner: SignerWithAddress;
-  let bulkBuyer: SignerWithAddress;
-  let manufcaturer: SignerWithAddress;
-  let middleman: SignerWithAddress;
-  let supplier: SignerWithAddress;
-  let specialCarrier: SignerWithAddress;
-
+  let participants: SignerWithAddress[];
   let supplyChain: SupplyChain;
 
   beforeEach(async () => {
-    [owner, bulkBuyer, manufcaturer, middleman, supplier, specialCarrier] = await ethers.getSigners();
+    participants = await ethers.getSigners();
     supplyChain = (await deployContract(
-      owner, 
+      participants[0], 
       SupplyChainArtifact,
-      [
-        bulkBuyer.address,
-        manufcaturer.address,
-        middleman.address,
-        supplier.address,
-        specialCarrier.address
-      ]
+      [[
+        participants[1].address,
+        participants[2].address,
+        participants[3].address,
+        participants[4].address,
+        participants[5].address
+      ]]
       )) as SupplyChain;
   });
 
   it(`replay conforming trace:`, async () => {
-    let tx = await supplyChain.connect(bulkBuyer).begin(0);
+    let tx = await supplyChain.connect(participants[1]).begin(0);
     expect(tx).to.not.emit(supplyChain, "NonConformingTrace")
 
-    tx = await supplyChain.connect(manufcaturer).begin(1);
+    tx = await supplyChain.connect(participants[2]).begin(1);
     expect(tx).to.not.emit(supplyChain, "NonConformingTrace")
 
-    tx = await supplyChain.connect(middleman).begin(3);
+    tx = await supplyChain.connect(participants[3]).begin(3);
     expect(tx).to.not.emit(supplyChain, "NonConformingTrace")
 
-    tx = await supplyChain.connect(middleman).begin(5);
+    tx = await supplyChain.connect(participants[3]).begin(5);
     expect(tx).to.not.emit(supplyChain, "NonConformingTrace")
 
-    tx = await supplyChain.connect(specialCarrier).begin(7);
+    tx = await supplyChain.connect(participants[4]).begin(7);
     expect(tx).to.not.emit(supplyChain, "NonConformingTrace")
 
-    tx = await supplyChain.connect(supplier).begin(8);
+    tx = await supplyChain.connect(participants[5]).begin(8);
     expect(tx).to.not.emit(supplyChain, "NonConformingTrace")
 
-    tx = await supplyChain.connect(supplier).begin(9);
+    tx = await supplyChain.connect(participants[4]).begin(9);
     expect(tx).to.not.emit(supplyChain, "NonConformingTrace")
 
-    tx = await supplyChain.connect(specialCarrier).begin(10);
+    tx = await supplyChain.connect(participants[5]).begin(10);
     expect(tx).to.not.emit(supplyChain, "NonConformingTrace")
 
-    tx = await supplyChain.connect(manufcaturer).begin(11);
+    tx = await supplyChain.connect(participants[2]).begin(11);
     expect(tx).to.not.emit(supplyChain, "NonConformingTrace")
 
-    tx = await supplyChain.connect(manufcaturer).begin(12);
+    tx = await supplyChain.connect(participants[2]).begin(12);
     expect(tx).to.not.emit(supplyChain, "NonConformingTrace")
     expect(tx).to.emit(supplyChain, "EndEvent")
   });
 
   it(`test non-conforming trace:`, async () => {
-    let tx = await supplyChain.connect(manufcaturer).begin(0);
+    let tx = await supplyChain.connect(participants[2]).begin(0);
     expect(tx).to.emit(supplyChain, "NonConformingTrace")
   });
 

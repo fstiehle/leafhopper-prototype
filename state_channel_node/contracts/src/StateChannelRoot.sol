@@ -1,13 +1,21 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import './StateChannelType.sol';
+interface StateChannelRoot {
 
-interface StateChannelRoot is StateChannelType {
-  function dispute(Step calldata step) external returns (bool);
-  function state(Step calldata step) external returns (bool);
-  event DisputeSucessfullyRaised(address);
-  event DisputeNewStateSubmitted(address);
-  event DisputeRejected(address);
-  event EndEvent(address);
+  struct Step {
+    uint from;
+    uint caseID;
+    uint taskID;
+    uint newTokenState;
+    bytes16 salt;
+    bytes[] signature;
+  }
+
+  function dispute() external returns (bool);
+  function dispute(Step calldata _step) external returns (bool);
+  function begin(uint id) external returns (bool);
+  event DisputeSucessfullyRaisedBy(address);
+  event DisputeNewStateSubmittedBy(address);
+  event DisputeRejectedOf(address);
 }

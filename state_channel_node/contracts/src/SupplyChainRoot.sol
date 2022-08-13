@@ -1,60 +1,118 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
+// import 'hardhat/console.sol';
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import './StateChannelRoot.sol';
 import './SupplyChainConformance.sol';
-import 'hardhat/console.sol';
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-contract SupplyChainRoot is StateChannelRoot {
+contract SupplyChainRoot is StateChannelRoot, SupplyChainConformance {
 
     using ECDSA for bytes32;
+    event NonConformingTrace(uint id, address by);
+    event EndEvent();
 
-    uint public tokenState = 1;
-    bool public disputed = false;
+    /**
+     * Token state encoded as bit array.
+     * Can be deomposed into a sequence of 2^i + 2^i, ...
+     * where each i is an enabled task.
+     */
+    uint public tokenState = 1; 
+
     uint private index = 0;
     address[5] private participants;
 
-    constructor(address[5] memory _participants) {
+    /// Timestamps for the challenge-response dispute window
+    uint public disputeMadeAtUNIX = 0;
+    uint public disputeWindowInUNIX;
+
+    /**
+     * @param _participants addresses for the roles 
+     * in the order (BulkBuyer, Manufacturer, Middleman, Supplier, SpecialCarrier)
+     * @param _disputeWindowInUNIX time for the dispute window to remain open in UNIX.
+     */
+    constructor(address[5] memory _participants, uint _disputeWindowInUNIX) {
        participants = _participants;
+       disputeWindowInUNIX = _disputeWindowInUNIX;
     }
 
-    // TODO: Case ID support 
-    function dispute(Step calldata step) external onlyParticipants returns (bool) {
-        if (!disputed && check(step)) {
-            disputed = true;
-            emit DisputeSucessfullyRaised(msg.sender);
+    /**
+     * Trigger new dispute or submit new state to elapse current dispute state
+     * @param _step Last unanimously signed step, or empty step if process is stuck in start event
+     */
+    function dispute(Step calldata _step) external onlyParticipants returns (bool) {
+        bool _check = check(_step);
+        if (0 == disputeMadeAtUNIX && _check) {
+            disputeMadeAtUNIX = block.timestamp;
+            emit DisputeSucessfullyRaisedBy(msg.sender);
+            return true;
+
+        } else if (disputeMadeAtUNIX + disputeWindowInUNIX > block.timestamp && _check) {
+            emit DisputeNewStateSubmittedBy(msg.sender);
             return true;
         }
-        emit DisputeRejected(msg.sender);
+
+        emit DisputeRejectedOf(msg.sender);
         return false;
     }
 
-    function state(Step calldata step) external onlyParticipants returns (bool) {
-        if (disputed && check(step)) {
-            emit DisputeNewStateSubmitted(msg.sender);
-            return true;
-        }
-        return false;
+    /// Dispute is always allowed when process is stuck in start event
+    function dispute() external onlyParticipants returns (bool) {
+        require(0 == disputeMadeAtUNIX && 1 == tokenState);
+        disputeMadeAtUNIX = block.timestamp;
+        emit DisputeSucessfullyRaisedBy(msg.sender);
+        return true;
     }
 
-    function check(Step calldata step) private returns (bool) {
-        if (step.taskID == 2 || step.taskID == 4 || step.taskID == 6 || step.taskID > 12) {
+    /**
+     * If a dispute window has elapsed, execution must continue through this function
+     * @param id id of the activity to begin
+     */
+    function begin(uint id) external onlyParticipants returns (bool) {
+        require(disputeMadeAtUNIX + disputeWindowInUNIX < block.timestamp);
+        // console.log("begin with", id);
+        if (!step(id)) {
+            // console.log("Non conforming", id);
+            emit NonConformingTrace(id, msg.sender);
+            return false;
+        }
+        return true;
+    }
+
+    function step(uint id) private returns (bool) {
+        uint turn = this.route(id);
+        if (turn >= participants.length || participants[turn] != msg.sender) {
+            return false;
+        }
+        uint newTokenState = this.task(tokenState, id);
+        if (newTokenState == tokenState) {
+            return false;
+        }
+
+        tokenState = newTokenState;
+        // End event
+        if ((tokenState & 8192) != 0) {
+            emit EndEvent();
+        }
+        return true;
+    }
+
+    function check(Step calldata _step) private returns (bool) {
+        if (_step.taskID == 2 || _step.taskID == 4 || _step.taskID == 6 || _step.taskID > 12) {
             // only used for internal orchestration
             return false;
         }
 
-        console.log( 'new check', index, step.taskID );
         // Check that step is higher than previously recorded steps
         // Due to the AND branch taskID 3 and 5 are of the same height
-        if ((index == 0 || index < step.taskID) || (index == 5 && step.taskID == 3)) {   
+        if ((index == 0 || index < _step.taskID) || (index == 5 && _step.taskID == 3)) {   
             // Check step
-            if (checkSignatures(step)) {
-                index = step.taskID;
-                tokenState = step.newTokenState;
-                console.log(step.newTokenState);
+            if (checkSignatures(_step)) {
+                index = _step.taskID;
+                tokenState = _step.newTokenState;
+                // console.log(step.newTokenState);
                 if ((tokenState & 8192) != 0) {
-                    emit EndEvent(msg.sender);
+                    emit EndEvent();
                 }
                 return true;
             }
@@ -63,24 +121,21 @@ contract SupplyChainRoot is StateChannelRoot {
         return false;
     }
 
-    function checkSignatures(Step calldata step) private view returns (bool) {
-        console.log("Enter check step");
+    function checkSignatures(Step calldata _step) private view returns (bool) {
         // TODO: Check CaseID
 
         // Is it signed?
         bytes32 payload = keccak256(
-            abi.encode(step.caseID, step.from, step.taskID, step.newTokenState, step.salt)
+            abi.encode(_step.caseID, _step.from, _step.taskID, _step.newTokenState, _step.salt)
         );
         for (uint256 i = 0; i < participants.length; i++) {
-            if (step.signature[i].length != 65) return false;
-            if (payload.toEthSignedMessageHash().recover(step.signature[i])
+            if (_step.signature[i].length != 65) return false;
+            if (payload.toEthSignedMessageHash().recover(_step.signature[i])
             != participants[uint(i)]
             ) {
                 return false;
             }
         }
-
-        console.log("signatures do match");
         return true;
     }
 

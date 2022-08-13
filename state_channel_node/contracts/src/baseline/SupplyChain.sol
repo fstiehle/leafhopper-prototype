@@ -8,7 +8,7 @@ contract SupplyChain is SupplyChainConformance {
 
     uint tokenState = 1;
     address[5] private participants;
-    event NonConformingTrace(uint id);
+    event NonConformingTrace(uint id, address by);
     event EndEvent();
 
     constructor(address[5] memory _participants) {
@@ -22,7 +22,7 @@ contract SupplyChain is SupplyChainConformance {
         // console.log("begin with", id);
         if (!step(id)) {
             // console.log("Non conforming", id);
-            emit NonConformingTrace(id);
+            emit NonConformingTrace(id, msg.sender);
             return false;
         }
         return true;

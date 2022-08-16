@@ -14,7 +14,7 @@ contract SupplyChainRoot is StateChannelRoot, SupplyChainConformance {
 
     /**
      * Token state encoded as bit array.
-     * Can be deomposed into a sequence of 2^i + 2^i, ...
+     * Can be deomposed into a sequence of 2^i + [2^i, ...]
      * where each i is an enabled task.
      */
     uint public tokenState = 1; 
@@ -40,8 +40,12 @@ contract SupplyChainRoot is StateChannelRoot, SupplyChainConformance {
      * Trigger new dispute or submit new state to elapse current dispute state
      * @param _step Last unanimously signed step, or empty step if process is stuck in start event
      */
-    function dispute(Step calldata _step) external onlyParticipants returns (bool) {
+    function submit(Step calldata _step) external onlyParticipants returns (bool) {
         bool _check = check(_step);
+        if ((tokenState & 8192) != 0) {
+            emit EndEvent();
+            return true;
+        }
         if (0 == disputeMadeAtUNIX && _check) {
             disputeMadeAtUNIX = block.timestamp;
             emit DisputeSucessfullyRaisedBy(msg.sender);
@@ -70,9 +74,7 @@ contract SupplyChainRoot is StateChannelRoot, SupplyChainConformance {
      */
     function begin(uint id) external onlyParticipants returns (bool) {
         require(disputeMadeAtUNIX + disputeWindowInUNIX < block.timestamp);
-        // console.log("begin with", id);
         if (!step(id)) {
-            // console.log("Non conforming", id);
             emit NonConformingTrace(id, msg.sender);
             return false;
         }
@@ -88,7 +90,6 @@ contract SupplyChainRoot is StateChannelRoot, SupplyChainConformance {
         if (newTokenState == tokenState) {
             return false;
         }
-
         tokenState = newTokenState;
         // End event
         if ((tokenState & 8192) != 0) {
@@ -102,7 +103,6 @@ contract SupplyChainRoot is StateChannelRoot, SupplyChainConformance {
             // only used for internal orchestration
             return false;
         }
-
         // Check that step is higher than previously recorded steps
         // Due to the AND branch taskID 3 and 5 are of the same height
         if ((index == 0 || index < _step.taskID) || (index == 5 && _step.taskID == 3)) {   
@@ -110,20 +110,13 @@ contract SupplyChainRoot is StateChannelRoot, SupplyChainConformance {
             if (checkSignatures(_step)) {
                 index = _step.taskID;
                 tokenState = _step.newTokenState;
-                // console.log(step.newTokenState);
-                if ((tokenState & 8192) != 0) {
-                    emit EndEvent();
-                }
                 return true;
             }
         }
-
         return false;
     }
 
     function checkSignatures(Step calldata _step) private view returns (bool) {
-        // TODO: Check CaseID
-
         // Is it signed?
         bytes32 payload = keccak256(
             abi.encode(_step.caseID, _step.from, _step.taskID, _step.newTokenState, _step.salt)

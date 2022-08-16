@@ -45,7 +45,7 @@ describe('StateChannelRoot SupplyChain Contract', () => {
       if (index > 0) await step.sign(wallet, index-1);
     })
     
-    let tx = await supplyChain.connect(participants[1])['dispute((uint256,uint256,uint256,uint256,bytes16,bytes[]))'](step.getBlockchainFormat());
+    let tx = await supplyChain.connect(participants[1]).submit(step.getBlockchainFormat());
     await expect(tx, 'dispute(0)').to.emit(supplyChain, 'DisputeSucessfullyRaisedBy');
     let newState = await supplyChain.connect(participants[2]).tokenState();
     expect(newState).to.equal(2);
@@ -60,7 +60,7 @@ describe('StateChannelRoot SupplyChain Contract', () => {
       if (index > 0) await step.sign(wallet, index-1);
     })
 
-    tx = await supplyChain.connect(participants[2])['dispute((uint256,uint256,uint256,uint256,bytes16,bytes[]))'](step.getBlockchainFormat());
+    tx = await supplyChain.connect(participants[2]).submit(step.getBlockchainFormat());
     await expect(tx, 'state(1)').to.emit(supplyChain, 'DisputeNewStateSubmittedBy');
     newState = await supplyChain.connect(participants[2]).tokenState();
     expect(newState).to.equal(4);
@@ -74,7 +74,7 @@ describe('StateChannelRoot SupplyChain Contract', () => {
     participants.forEach(async (wallet, index) => {
       if (index > 0) await step.sign(wallet, index-1);
     })
-    tx = await supplyChain.connect(participants[3])['dispute((uint256,uint256,uint256,uint256,bytes16,bytes[]))'](step.getBlockchainFormat());
+    tx = await supplyChain.connect(participants[3]).submit(step.getBlockchainFormat());
     expect(tx).to.not.throw;
     newState = await supplyChain.connect(participants[3]).tokenState();
     expect(newState).to.equal(72);
@@ -89,7 +89,7 @@ describe('StateChannelRoot SupplyChain Contract', () => {
       if (index > 0) await step.sign(wallet, index-1);
     })
   
-    tx = await supplyChain.connect(participants[3])['dispute((uint256,uint256,uint256,uint256,bytes16,bytes[]))'](step.getBlockchainFormat());
+    tx = await supplyChain.connect(participants[3]).submit(step.getBlockchainFormat());
     expect(tx).to.not.throw;
     newState = await supplyChain.connect(participants[3]).tokenState();
     expect(newState).to.equal(80)
@@ -109,7 +109,7 @@ describe('StateChannelRoot SupplyChain Contract', () => {
       if (index > 1) await step.sign(wallet, index-1);
     })
   
-    let tx = await supplyChain.connect(participants[1])['dispute((uint256,uint256,uint256,uint256,bytes16,bytes[]))'](step.getBlockchainFormat());
+    let tx = await supplyChain.connect(participants[1]).submit(step.getBlockchainFormat());
     await expect(tx, 'not all have signed').to.emit(supplyChain, 'DisputeRejectedOf');
     let _newState = await supplyChain.connect(participants[2]).tokenState();
     expect(_newState).to.equal(1);
@@ -117,7 +117,7 @@ describe('StateChannelRoot SupplyChain Contract', () => {
     participants.forEach(async (wallet, index) => {
       if (index > 0) await step.sign(wallet, index-1);
     })
-    tx = await supplyChain.connect(participants[1])['dispute((uint256,uint256,uint256,uint256,bytes16,bytes[]))'](step.getBlockchainFormat());
+    tx = await supplyChain.connect(participants[1]).submit(step.getBlockchainFormat());
     await expect(tx, 'all have signed now').to.emit(supplyChain, 'DisputeSucessfullyRaisedBy');
     _newState = await supplyChain.connect(participants[2]).tokenState();
     expect(_newState).to.equal(2);
@@ -132,13 +132,13 @@ describe('StateChannelRoot SupplyChain Contract', () => {
       if (index > 0) await step.sign(wallet, index-1);
     })
 
-    tx = await supplyChain.connect(participants[2])['dispute((uint256,uint256,uint256,uint256,bytes16,bytes[]))'](step.getBlockchainFormat());
+    tx = await supplyChain.connect(participants[2]).submit(step.getBlockchainFormat());
     await expect(tx).to.emit(supplyChain, 'DisputeNewStateSubmittedBy');
     expect(tx).to.not.throw;
     let newState = await supplyChain.connect(participants[2]).tokenState();
     expect(newState).to.equal(4)
 
-    tx = await supplyChain.connect(participants[2])['dispute((uint256,uint256,uint256,uint256,bytes16,bytes[]))'](replay_later.getBlockchainFormat());
+    tx = await supplyChain.connect(participants[2]).submit(replay_later.getBlockchainFormat());
     await expect(tx, 'try to replay step').to.not.emit(supplyChain, 'DisputeNewStateSubmittedBy');
     newState = await supplyChain.connect(participants[2]).tokenState();
     expect(newState).to.equal(4)

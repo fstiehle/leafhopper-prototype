@@ -13,7 +13,7 @@ interface StateChannelRoot {
   }
 
   function dispute() external returns (bool);
-  function dispute(Step calldata _step) external returns (bool);
+  function submit(Step calldata _step) external returns (bool);
   function begin(uint id) external returns (bool);
   event DisputeSucessfullyRaisedBy(address);
   event DisputeNewStateSubmittedBy(address);

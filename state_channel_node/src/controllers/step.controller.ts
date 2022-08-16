@@ -23,6 +23,8 @@ const step = (identity: Identity, conformance: ConformanceCheck, oracle: Oracle)
       return next(new Error(`Malformed JSON: ${JSON.stringify(req.body)} to ${JSON.stringify(receivedStep)}`));
     }
 
+    // TODO: check all signatures of last step
+    // set state to last step
     // Send signed ACK or error back
     if (!conformance.step(receivedStep)) {
       res.status(403).send("Non-conforming behaviour");

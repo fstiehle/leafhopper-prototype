@@ -55,7 +55,7 @@ describe('BENCHMARK COST: Baseline', () => {
   it(`replay conforming trace:`, async () => {
     const begin_gasCost = new Array<number>();
     const cases_gasCost = new Array<number>();
-    const repeat = 5;
+    const repeat = 2;
     for (let index = 0; index < repeat; index++) {
         for (const t of trace.conforming) {
           let case_gasCost = 0;

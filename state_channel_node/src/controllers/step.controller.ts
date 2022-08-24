@@ -10,9 +10,9 @@ import Oracle from '../classes/Oracle';
  */
 const step = (identity: Identity, conformance: ConformanceCheck, oracle: Oracle) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-
+    console.log("Step!");
     // Check blockchain for possible dispute state
-    if (oracle.contract && await oracle.isDisputed) {
+    if (oracle.contract && await oracle.isDisputed()) {
       console.log('Dispute is raised.');
       res.status(400).send("A dispute is currently active.");
       return next();
@@ -22,7 +22,7 @@ const step = (identity: Identity, conformance: ConformanceCheck, oracle: Oracle)
     if (!receivedStep) {
       return next(new Error(`Malformed JSON: ${JSON.stringify(req.body)} to ${JSON.stringify(receivedStep)}`));
     }
-
+    console.log(receivedStep); 
     // TODO: check all signatures of last step
     // set state to last step
     // Send signed ACK or error back

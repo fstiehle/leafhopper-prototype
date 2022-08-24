@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import beginRouter from '../routes/begin.route';
 import stepRouter from '../routes/step.route';
 import disputeRouter from '../routes/dispute.route';
+import startRouter from '../routes/start.route';
 import Oracle from '../classes/Oracle';
 import RequestServer from '../classes/RequestServer';
 import { ethers } from 'ethers';
@@ -27,15 +28,19 @@ const getProvidersFromConfig = (contract : typeof leafhopper.contract) => {
 
 const getParticipantsRoutingFromConfig = (participants : typeof leafhopper.participants) => {
   const routing = new Map<Participant, RoutingInformation>();
-  for (const participant of leafhopper.participants) {
-    routing.set(participant.id, new RoutingInformation(participant.id, 'localhost', participant.port));
+  for (const participant of participants) {
+    routing.set(participant.id, new RoutingInformation(
+      participant.id, 
+      Participant[participant.id].toLowerCase(), 
+      8080)
+    );
   }
   return routing;
 }
 
 const getParticipantsAddressFromConfig = (participants : typeof leafhopper.participants) => {
   const address = new Map<Participant, string>();
-  for (const participant of leafhopper.participants) {
+  for (const participant of participants) {
     address.set(participant.id, participant.address);
   }
   return address;
@@ -62,8 +67,8 @@ const getParticipantsAddressFromConfig = (participants : typeof leafhopper.parti
   app.use(express.json());
   app.use('/begin', beginRouter(router, identity, conformance, routing, oracle, requestServer));
   app.use('/step', stepRouter(router, identity, conformance, oracle));
-  app.use('/dispute', disputeRouter(router, conformance, oracle));
-  app.use('/start', disputeRouter(router, conformance, oracle));
+  //app.use('/dispute', disputeRouter(router, conformance, oracle));
+  app.use('/attach', startRouter(router, conformance, oracle));
 
   app.use((error: Error, _: Request, response: Response, next: NextFunction) => {
     const message = error.message || 'Something went wrong';

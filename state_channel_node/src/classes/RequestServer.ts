@@ -29,10 +29,10 @@ export default class RequestServer {
   
         res.on('end', () => {
           if (res.statusCode !== 200) {
-            reject(new Error(`Error when trying to reach next participant: ${res.statusCode} ${res.statusMessage}`));
+            reject(new Error(`${res.statusCode} ${responseBody}`));
           } else {
             try {
-              resolve(JSON.parse(responseBody));
+              resolve(responseBody);
             } catch (error) {
               reject(new Error(error));
             }

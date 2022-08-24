@@ -12,7 +12,8 @@ import { ethers } from 'hardhat';
       leafhopper.participants[2].address,
       leafhopper.participants[3].address,
       leafhopper.participants[4].address
-    ]
+    ],
+    1209600
   );
 
   const receipt = await supplyChainRoot.deployTransaction.wait(1);

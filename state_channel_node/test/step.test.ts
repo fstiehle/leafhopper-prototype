@@ -4,7 +4,6 @@ import chai from 'chai';
 import Participant from '../src/classes/Participant';
 import Step from '../src/classes/Step';
 import {ethers} from 'ethers';
-import Oracle from '../src/classes/Oracle';
 const {expect} = chai;
 
 describe('Dry test functions', () => {

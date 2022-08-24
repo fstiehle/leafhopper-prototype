@@ -19,7 +19,7 @@ const participants = new Map<Participant, RoutingInformation>([
 
 const pubKeys = new Map<Participant, string>();
 const keys =  new Map<Participant, ethers.Wallet>();
-for (const [participant, routingInformation] of participants) {
+for (const [participant, _] of participants) {
   const wallet = ethers.Wallet.createRandom();
   keys.set(participant, wallet);
   pubKeys.set(participant, wallet.address)

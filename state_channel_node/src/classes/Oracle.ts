@@ -16,10 +16,10 @@ export default class Oracle {
   providers: Provider[];
 
   constructor(address: string, wallet: Wallet, providers: Provider[]) {
-    console.log("Attach contract at:", address);
-    if (!address) { return; }
     this.wallet = wallet;
     this.providers = providers;
+    if (!address) { return; }
+    console.log("Attach contract at:", address);
     this.contract = this.attach(address);
   }
 
@@ -31,12 +31,13 @@ export default class Oracle {
     ) as SupplyChainRoot;
   }
 
-  isDisputed(): Promise<boolean> {
-    return this.contract.disputed();
+  async isDisputed(): Promise<boolean> {
+    const dispute = await this.contract.disputeMadeAtUNIX();
+    return (0 !== dispute.toNumber());
   }
 
   async dispute(step: Step): Promise<boolean> {
-    const tx = await this.contract.dispute(step.getBlockchainFormat());
+    const tx = await this.contract.submit(step.getBlockchainFormat());
     const receipt = await tx.wait(CONFIRMATION_BLOCKS);
     console.log('BENCHMARK Gas used for dispute(): ', receipt.gasUsed.toString())
     if (receipt.events?.filter((x) => {return x.event === DISPUTE_EVENT}).length > 0) { return true }
@@ -44,7 +45,7 @@ export default class Oracle {
   }
 
   async state(step: Step): Promise<boolean> {
-    const tx = await this.contract.state(step.getBlockchainFormat());
+    const tx = await this.contract.submit(step.getBlockchainFormat());
     const receipt = await tx.wait(CONFIRMATION_BLOCKS);
     console.log('BENCHMARK Gas used for step(): ', receipt.gasUsed.toString())
     return receipt.status !== 0;

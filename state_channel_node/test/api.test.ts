@@ -13,9 +13,10 @@ import SupplyChainConformance from '../src/classes/SupplyChainConformance';
 import { Server } from 'node:http';
 import Oracle from '../src/classes/Oracle';
 import RequestServer from '../src/classes/RequestServer';
-import { doesNotMatch } from 'assert';
-import { resolve } from 'path';
 const {expect} = chai;
+
+// ignore certificate not signed for localhost
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = '0'; 
 
 chai.use(chaiHttp);
 describe('/begin and /step', () => {

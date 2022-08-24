@@ -10,9 +10,10 @@ import Oracle from '../classes/Oracle';
  */
 const start = (conformance: ConformanceCheck, oracle: Oracle) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    const address = req.params.address;
+    const address = req.params.root;
     oracle.attach(address);
     conformance.reset();
+    console.log("New instance with root contract", address)
     res.sendStatus(200);
     return next();
   }

@@ -17,18 +17,22 @@ const begin = (
   return async (req: Request, res: Response, next: NextFunction) => {
     const taskID = parseInt(req.params.id);
     // Check blockchain for possible dispute state
-    if (oracle.contract && oracle.isDisputed) {
+    if (oracle.contract && await oracle.isDisputed()) {
       console.log('Dispute is raised.');
       res.status(400).send("A dispute is currently active.");
       return next();
     }
 
-    // Check if previous step has been signed by all participants
     if (taskID !== 0) {
-      const prevStep = new Step(req.body);
-      if (!prevStep) {
-        throw new Error(`Malformed JSON: ${JSON.stringify(req.body)} to ${JSON.stringify(prevStep)}`);
+      // Check if previous step has been signed by all participants
+      let prevStep: Step;
+      try {
+        prevStep = new Step(req.body.step);
+      } catch(err) {
+        console.error(err);
+        throw new Error(`Malformed JSON: ${JSON.stringify(req.body.step)} to ${JSON.stringify(prevStep)}`);
       }
+
       if (prevStep.signature.length !== routing.routing.size) {
         throw new Error(`Previous step not signed by all participants: ${JSON.stringify(prevStep.signature)}`);
       }
@@ -75,7 +79,7 @@ const begin = (
     // Wait for all ACKs
     Promise.all(broadcast).then(results => {
       results.forEach((result, participant) => {
-        const receivedStep = new Step(result as unknown as StepPublicProperties);
+        const receivedStep = new Step(JSON.parse(result) as unknown as StepPublicProperties);
 
         if (!receivedStep) {
           throw new Error(`Malformed JSON: ${JSON.stringify(req.body)} to ${JSON.stringify(receivedStep)}`);
@@ -106,7 +110,7 @@ const begin = (
       console.log('All ACKs returned');
       // TODO: set state to new step
       res.setHeader('Content-Type', 'application/json');
-      res.status(200).send(JSON.stringify(step));
+      res.status(200).send(JSON.stringify({step}));
       return next();
 
     })

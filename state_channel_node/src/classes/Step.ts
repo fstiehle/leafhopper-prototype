@@ -1,8 +1,7 @@
-import Participant from "./Participant";
 import Signable from "./Signable";
 
 export interface StepPublicProperties {
-  from: Participant;
+  from: number;
   caseID: number;
   taskID: number;
   newTokenState: number[];
@@ -11,7 +10,7 @@ export interface StepPublicProperties {
 }
 
 export default class Step extends Signable implements StepPublicProperties {
-  from: Participant;
+  from: number;
   caseID: number;
   taskID: number;
   newTokenState: number[];

@@ -5,8 +5,10 @@
   "license": "MIT",
   "author": "Fabian Stiehle",
   "scripts": {
-    "prekeygen": "npm run build",
-    "keygen": "node dist/state-channel-node/keys/_keygen.script.js",
+    "pregenerate/keys": "npm run build",
+    "pregenerate/traces": "npm run build",
+    "generate/keys": "node dist/keys/_keygen.script.js",
+    "generate/traces": "node dist/benchmark/generate_traces.js",
     "lint": "eslint . --ext .ts",
     "build": "eslint . --ext .ts && rimraf dist && tsc && ncp .env dist/.env",
     "preserve": "npm run build",
@@ -14,8 +16,8 @@
     "prestart": "npm run build",
     "start": "node dist/src/app.js",
     "test": "mocha -r ts-node/register test/api.test.ts --timeout 10000",
-    "benchmark/cost": "node dist/benchmark/cost.js",
-    "prebenchmark/cost": "npm run build"
+    "benchmark/correctness": "node dist/benchmark/correctness.js",
+    "prebenchmark/correctness": "npm run build"
   },
   "devDependencies": {
     "@types/chai": "^4.3.1",

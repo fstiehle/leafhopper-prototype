@@ -24,7 +24,7 @@ const providers = getProvidersFromConfig(leafhopper.contract);
 const participants = getParticipantsRoutingFromConfig(leafhopper.participants);
 const addresses = getParticipantsAddressFromConfig(leafhopper.participants);
 // Set own identity
-const me = Participant[leafhopper.identity as keyof typeof Participant];
+const me = Number.parseInt(leafhopper.identity);
 const port = 8080;
 
 // Load TLS keys
@@ -60,4 +60,7 @@ const httpsServer = https.createServer(
   }, 
   app
 );
-httpsServer.listen(port, () => console.log(`${me} running on ${port} ⚡`));
+
+httpsServer.listen(port, () => console.log(
+  `Participant ${me} running on ${participants.get(Number.parseInt(leafhopper.identity)).hostname}:${participants.get(Number.parseInt(leafhopper.identity)).port} ⚡`
+  ));

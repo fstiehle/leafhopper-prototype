@@ -1,16 +1,17 @@
+import { CANCELLED } from 'dns';
 import { Request, Response, NextFunction } from 'express';
 import ConformanceCheck from '../classes/Conformance';
 import Oracle from '../classes/Oracle';
 
 /**
- * 
  * @param conformance 
  * @param oracle 
  * @returns 
  */
 const dispute = (conformance: ConformanceCheck, oracle: Oracle) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-
+    console.log("dispute called", req);
+    
     if (!oracle.contract) {
       res.sendStatus(500);
       return next(); 

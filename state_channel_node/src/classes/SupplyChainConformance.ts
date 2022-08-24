@@ -16,7 +16,6 @@ export default class SupplyChainConformance implements Conformance {
     this.tokenState = Array<number>(14).fill(0);
     this.steps = new Array<Step>();
     this.tokenState[0] = 1;
-    console.log(this.tokenState)
   }
 
   reset() {

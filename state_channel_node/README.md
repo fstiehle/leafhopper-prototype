@@ -48,3 +48,5 @@ A controller handles the incoming API requests as seen above. It uses aformentio
 - `dispute.controller.ts`: Handles the `/dispute` API. It uses the `Oracle` class to trigger a dispute on the blockchain with the current `tokenState`.
 - start.controller.ts: Handles the `/attach:contractAddress` API. Mainly to make benchmarking easier. It alows to reset the state of a node and attach a new root contract with address `contractAddress`.
 - step.controller.ts: Receives transition proposals encoded as `Step` over the `/step` API. It verifies a proposal's conformance using the `Conformance` class; if verified it answers with a signed transition encoded as `Step`.
+
+# Scripts

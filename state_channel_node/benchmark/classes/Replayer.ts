@@ -43,7 +43,7 @@ export default class Replayer {
 
     const answer = await this.requestServer.doRequest(
       options, 
-      this.responseCache ? JSON.stringify({step: this.responseCache}) : "{}"
+      this.responseCache ? JSON.stringify({prevSteps: [this.responseCache]}) : "{}"
     )
     .catch(error => {
       assert(!error, error);

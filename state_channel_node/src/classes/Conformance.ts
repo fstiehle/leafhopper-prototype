@@ -10,5 +10,7 @@ export default interface Conformance {
   lastCheckpoint: number;
 
   step(step: Step): boolean
+  checkStep(step: Step): boolean
+  checkStepisFinalised(step: Step): boolean
   reset(): void
 }

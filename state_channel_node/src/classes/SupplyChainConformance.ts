@@ -57,11 +57,6 @@ export default class SupplyChainConformance implements Conformance {
         step.taskID
       );
       return true;
-    } else {
-      // Rollback
-      //console.log(`Rollback because of ${prevSteps[index]}`);
-      this.steps = currentSteps;
-      this.tokenState = currentTokenState;
     }
 
     return false;
@@ -92,6 +87,22 @@ export default class SupplyChainConformance implements Conformance {
     if (!step.verifySignature(this.pubKeys.get(step.from)!, step.signature[step.from])) {
       return false;
     }
+
+    return true;
+  }
+
+  checkStepisFinalised(step: Step) {
+    if (step.signature.length !== this.pubKeys.size) {
+      console.error(`Previous step not signed by all participants: ${JSON.stringify(step.signature)}`);
+      return false;
+    }
+
+    step.signature.forEach((sig, par) => {
+      if (!step.verifySignature(this.pubKeys.get(par), sig)) {
+        console.error(`Signature of participant: ${par} not matching`);
+        return false;
+      }
+    });
 
     return true;
   }

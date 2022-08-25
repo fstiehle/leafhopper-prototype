@@ -13,6 +13,7 @@ import SupplyChainConformance from '../src/classes/SupplyChainConformance';
 import { Server } from 'node:http';
 import Oracle from '../src/classes/Oracle';
 import RequestServer from '../src/classes/RequestServer';
+import Step from '../src/classes/Step';
 const {expect} = chai;
 
 // ignore certificate not signed for localhost
@@ -24,6 +25,7 @@ describe('/begin and /step', () => {
   let servers: Map<Participant, Server>;
   let participants: Map<Participant, RoutingInformation>;
   let rootCA: string;
+  let prevSteps: Step[];
 
   before(() => {
     participants = new Map<Participant, RoutingInformation>([
@@ -44,6 +46,8 @@ describe('/begin and /step', () => {
     servers = new Map<Participant, Server>();
     keys = new Map<Participant, ethers.Wallet>();
     const pubKeys = new Map<Participant, string>();
+    prevSteps = new Array<Step>();
+
     for (const [participant, routingInformation] of participants) {
       let sK, cert;
       try {
@@ -83,15 +87,14 @@ describe('/begin and /step', () => {
 
   it('test with conforming behaviour', async () => {
     // Bulk Buyer to Manufacturer
-    let prevStep;
     await chai.request('https://localhost:' + participants.get(Participant.BulkBuyer).port)
       .post('/begin/0')
       .ca(Buffer.from(rootCA))
       .set('content-type', 'application/json')
       .then(res => {
         expect(res).to.have.status(200);
-        expect(res.body).to.have.property('signature');
-        prevStep = res.body;
+        expect(res.body.step).to.have.property('signature');
+        prevSteps.push(new Step(res.body.step));
       })
       .catch(err => {
         console.log(err);
@@ -103,25 +106,26 @@ describe('/begin and /step', () => {
       .post('/begin/1')
       .ca(Buffer.from(rootCA))
       .set('content-type', 'application/json')
-      .send(prevStep)
+      .send(JSON.stringify({prevSteps: [prevSteps[0]]}))
       .then(res => {
         expect(res).to.have.status(200);
-        prevStep = res.body;
+        prevSteps.push(new Step(res.body.step));
       })
       .catch(err => {
         expect(err).to.be.null;
         console.log(err);
      });
 
+    
     // Middleman to Supplier
     await chai.request('https://localhost:' + participants.get(Participant.Middleman).port)
     .post('/begin/3')
     .ca(Buffer.from(rootCA))
     .set('content-type', 'application/json')
-    .send(prevStep)
+    .send(JSON.stringify({prevSteps: [prevSteps[1]]}))
     .then(res => {
       expect(res).to.have.status(200);
-      prevStep = res.body;
+      prevSteps.push(new Step(res.body.step));
     })
     .catch(err => {
       expect(err).to.be.null;
@@ -133,10 +137,10 @@ describe('/begin and /step', () => {
     .post('/begin/5')
     .ca(Buffer.from(rootCA))
     .set('content-type', 'application/json')
-    .send(prevStep)
+    .send(JSON.stringify({prevSteps: [prevSteps[2]]}))
     .then(res => {
       expect(res).to.have.status(200);
-      prevStep = res.body;
+      prevSteps.push(new Step(res.body.step));
     })
     .catch(err => {
       expect(err).to.be.null;
@@ -148,10 +152,10 @@ describe('/begin and /step', () => {
     .post('/begin/7')
     .ca(Buffer.from(rootCA))
     .set('content-type', 'application/json')
-    .send(prevStep)
+    .send(JSON.stringify({prevSteps: [prevSteps[3]]}))
     .then(res => {
       expect(res).to.have.status(200);
-      prevStep = res.body;
+      prevSteps.push(new Step(res.body.step));
     })
     .catch(err => {
       expect(err).to.be.null;
@@ -167,7 +171,7 @@ describe('/begin and /step', () => {
       .ca(Buffer.from(rootCA))
       .then(res => {
         expect(res).to.have.status(200);
-        prevStep = res.body;
+        prevSteps.push(new Step(res.body.step));
       })
       .catch(err => {
         console.log(err);
@@ -179,10 +183,10 @@ describe('/begin and /step', () => {
       .post('/begin/1')
       .ca(Buffer.from(rootCA))
       .set('content-type', 'application/json')
-      .send(prevStep)
+      .send(JSON.stringify({prevSteps: [prevSteps.pop()]}))
       .then(res => {
         expect(res).to.have.status(200);
-        prevStep = res.body;
+        prevSteps.push(new Step(res.body.step));
       })
       .catch(err => {
         expect(err).to.be.null;
@@ -197,10 +201,10 @@ describe('/begin and /step', () => {
     .post('/begin/5')
     .ca(Buffer.from(rootCA))
     .set('content-type', 'application/json')
-    .send(prevStep)
+    .send(JSON.stringify({prevSteps: [prevSteps.pop()]}))
     .then(res => {
       expect(res).to.have.status(200);
-      prevStep = res.body;
+      prevSteps.push(new Step(res.body.step));
     })
     .catch(err => {
       expect(err).to.be.null;
@@ -212,7 +216,7 @@ describe('/begin and /step', () => {
     .post('/begin/7')
     .ca(Buffer.from(rootCA))
     .set('content-type', 'application/json')
-    .send(prevStep)
+    .send(JSON.stringify({prevSteps: [prevSteps.pop()]}))
     .then(res => {
       expect(res).to.have.status(500);
     })

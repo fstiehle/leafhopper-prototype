@@ -3,6 +3,7 @@ import Step from '../classes/Step';
 import ConformanceCheck from '../classes/Conformance';
 import Identity from '../classes/Identity';
 import Oracle from '../classes/Oracle';
+import SupplyChainConformance from '../classes/SupplyChainConformance';
 
 /**
  * Receives new token state from other participant and task to invoke 
@@ -10,7 +11,6 @@ import Oracle from '../classes/Oracle';
  */
 const step = (identity: Identity, conformance: ConformanceCheck, oracle: Oracle) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    console.log("Step!");
     // Check blockchain for possible dispute state
     if (oracle.contract && await oracle.isDisputed()) {
       console.log('Dispute is raised.');
@@ -18,15 +18,41 @@ const step = (identity: Identity, conformance: ConformanceCheck, oracle: Oracle)
       return next();
     }
 
-    const receivedStep = new Step(req.body.step);
-    if (!receivedStep) {
-      return next(new Error(`Malformed JSON: ${JSON.stringify(req.body)} to ${JSON.stringify(receivedStep)}`));
+    let receivedStep: Step;
+    try {
+      receivedStep = new Step(req.body.step);
+    } catch (err) {
+      return next(new Error(`Malformed JSON: ${JSON.stringify(req.body)}`));
     }
-    console.log(receivedStep); 
-    // TODO: check all signatures of last step
-    // set state to last step
+    const taskID = receivedStep.taskID;
+    const prevSteps = new Array<Step>();
+    if (taskID !== 0) {
+      // Check previous steps
+      // these checks fail silent but conformance.checkStep(receivedStep) will fail 
+      // if not all required previosus steps are present
+      if (!req.body.prevSteps) {
+        throw new Error(`Malformed JSON`);
+      }
+
+      for (const bodyStep of req.body.prevSteps) {
+        let prevStep: Step
+        try {
+          prevStep = new Step(bodyStep);
+        } catch(err) {
+          console.log(`Malformed JSON: ${JSON.stringify(bodyStep)}`);
+        }
+        prevSteps.push(prevStep);
+      }
+
+      for (const prevStep of prevSteps) {
+        if (conformance.checkStepisFinalised(prevStep)) {
+          conformance.step(prevStep);
+        }
+      }
+    }
+
     // Send signed ACK or error back
-    if (!conformance.step(receivedStep)) {
+    if (!conformance.checkStep(receivedStep)) {
       res.status(403).send("Non-conforming behaviour");
       return next();
     }

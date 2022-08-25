@@ -18,6 +18,7 @@ process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = '0';
         await replayer.replay(event[0], event[1]);
       } catch(err) {
         assert(!err);
+        return new Error("Conforming behaviour was considered non-conforming");
       }
     }
     console.log("Sucess.")
@@ -31,20 +32,25 @@ process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = '0';
     await replayer.attach(address);
     const errors = new Array<any>();
     console.log(trace)
-    for (const [i, v] of trace.entries()) {
+    for (const [_, v] of trace.entries()) {
       try {
         await replayer.replay(v[0], v[1]);
       } catch(err) {
-        errors.push(err);
+        errors.push(new Error(`(task:${v[0]}, initiator:${v[1]}): ${err})`));
       }
+    }
+    if (errors.length === 0) {
+      return new Error("Non-conforming behaviour was not spoted!");
     }
     assert(errors.length > 0);
     console.log("Sucess. Non-conformance last detected: ", errors.pop())
   }
 
+  console.log("Sucess. All conforming and non-conforming behaviour detected accordingly");
+
 })()
 .then(() => process.exit(0))
   .catch((err) => {
-    console.error(err.message);
+    console.error(err);
     process.exit(1);
   });

@@ -15,7 +15,7 @@ We assume an external component such as a process aware information system (PAIS
 
 ## Figures
 ### Leafhopper Main Components
-<img src="https://raw.githubusercontent.com/fstiehle/leafhopper-prototype/main/figures/architecture.svg?token=GHSAT0AAAAAABV5PDAGZ655GEFU4SWP4WKOYYHQJYA" alt="Leafhopper Architecture" width="800"/>
+<img src="https://github.com/fstiehle/leafhopper-prototype/blob/74fdfe1f0a2260e42552701acafdac64014bed13/figures/architecture.svg" alt="Leafhopper Architecture" width="800"/>
 
 ### Supply Chain Use Case
-<img src="https://github.com/fstiehle/leafhopper-prototype/blob/a44dcb734a76a243c08e184790e746cf58e922ad/figures/use_case.svg" alt="Use case" width="800"/>
+<img src="https://github.com/fstiehle/leafhopper-prototype/blob/74fdfe1f0a2260e42552701acafdac64014bed13/figures/use-case.svg" alt="Use case" width="800"/>

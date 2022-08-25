@@ -20,7 +20,7 @@ The State Channel Node is a node.js server and holds the current state of the pr
   - `classes`: ([See Classes below](https://github.com/fstiehle/leafhopper-prototype/tree/main/state_channel_node#classes)) Classes encapsulate information and functionality used by the controllers.
   - `controllers`: ([See Controller below](https://github.com/fstiehle/leafhopper-prototype/tree/main/state_channel_node#controller)) A controller handles the incoming API requests as seen above.
 - `test` contains test files for the node. Run with `npm run test`
-- `contracts`: contain the solidity files, test and deployment scripts for the root contract and a baseline contract, which was used to compare Leafhopper to a full on-chain approach.
+- `contracts`: contain the solidity files, test and deployment scripts for the root contract. It also conatins a baseline contract, which was used to compare Leafhopper to a full on-chain approach.
 # Software Architecture
 
 ## Classes

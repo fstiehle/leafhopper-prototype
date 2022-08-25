@@ -17,8 +17,9 @@ The State Channel Node is a node.js server and holds the current state of the pr
 - `benchmark` contains the code to perform the correctness verification. See replication of evaluation. 
 - `keys` contains a script which: (i) generates a root certificate, (ii) generates RSA key pairs for all participants, (iii) issues a certificate for each participant.
 - `src` contains the source files of the node, see software architecture below. Build with `npm run build`
--- `classes`: See Classes below. Classes encapsulate information and functionality used by the controllers.
--- `controllers`: A controller handles the incoming API requests as seen above.
+  - `classes`: ([See Classes below](https://github.com/fstiehle/leafhopper-prototype/tree/main/state_channel_node#classes)) Classes encapsulate information and functionality used by the controllers.
+  - `controllers`: ([See Controller below](https://github.com/fstiehle/leafhopper-prototype/tree/main/state_channel_node#controller)) A controller handles the incoming API requests as seen above.
+  
 - `test` contains test files for the node. Run with `npm run test`
 # Software Architecture
 

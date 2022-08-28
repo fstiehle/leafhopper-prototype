@@ -26,6 +26,5 @@ The project is built using node and the package manager yarn. For the correctnes
 
 1. Simulate the state channel network: In `leafhopper-prototype/state_channel_node/` run `docker compose up`.
 > :warning: Make sure you don't simulate the Ethereum node locally (as done in the cost benchmark above). This is now done inside the state channel network. Doing both will cause port mapping issues.
-2. Execute correctness benchmark in a second shell window: In `leafhopper-prototype/state_channel_node/contracts` run `npm run benchmark/correctness`. The cost benchmark outputs the benchmark result formated in tables on the console.
-> This may take a while, as for each new trace it redeployes the state channel root contract.
+2. Execute correctness benchmark in a second shell window: In `leafhopper-prototype/state_channel_node/` run `npm run benchmark/correctness`. This may take a while, as for each new trace it redeployes the state channel root contract. 
 > It takes the traces from `leafhopper-prototype/state_channel_node/benchmark/generated_traces.json`. The generation can be repeated (resulting in different random traces) by running `npm run generate/traces`.

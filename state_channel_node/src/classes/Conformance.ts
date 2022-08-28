@@ -7,7 +7,6 @@ export default interface Conformance {
   steps: Step[];
   tokenState: Array<number>;
   pubKeys: Map<Participant, string>;
-  lastCheckpoint: number;
 
   step(step: Step): boolean
   checkStep(step: Step): boolean

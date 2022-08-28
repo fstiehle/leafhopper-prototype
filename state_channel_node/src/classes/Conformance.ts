@@ -1,5 +1,4 @@
 import Participant from "./Participant";
-import RoutingInformation from "./RoutingInformation";
 import Step from "./Step";
 
 export default interface Conformance {

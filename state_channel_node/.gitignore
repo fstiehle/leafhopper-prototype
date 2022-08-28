@@ -3,7 +3,6 @@ keys/*.crt
 keys/*.key
 keys/*.pub
 keys/*.srl
-*.env
 
 # From https://github.com/geshan/expressjs-structure/blob/master/.gitignore
 # Logs
@@ -77,8 +76,8 @@ typings/
 .yarn-integrity
 
 # dotenv environment variables file
-.env
-.env.test
+#.env
+#.env.test
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache

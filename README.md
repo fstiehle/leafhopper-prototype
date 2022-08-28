@@ -15,7 +15,7 @@ We assume an external component such as a process aware information system (PAIS
 - The __State Channel Root__ is a Solidity Contract and holds the last legal state posted to the blockchain. Should a dispute be triggered, the root validates the submitted state by verifying the signatures of all participants. The root also implements conformance checking capabilities, which allows it to enforce the honest continuation of the contract.
 
 ## Replicate Evaluation Results
-[REPLICATE.md](https://github.com/fstiehle/leafhopper-prototype/blob/main/REPLICATE.md) describes how to replicate the results in the evaluation section of the corresponding master thesis 'Scaling Up from Layer One: Business Process Execution on Blockchain Layer Two'.
+[REPLICATE.md](https://github.com/fstiehle/leafhopper-prototype/blob/main/REPLICATE.md) describes how to replicate the results in the evaluation section of the corresponding master's thesis 'Scaling Up from Layer One: Business Process Execution on Blockchain Layer Two'.
 
 ## Run it
 

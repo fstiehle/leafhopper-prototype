@@ -6,7 +6,7 @@ export default class RoutingInformation {
   // HTTP options
   hostname: string;
   port: number;
-  path = "/step";
+  path = "/step/";
   method = 'POST';
 
   constructor(participant: Participant, hostname: string, port: number) {

@@ -20,14 +20,14 @@ export default class Oracle {
     this.providers = providers;
     if (!address) { return; }
     console.log("Attach contract at:", address);
-    this.contract = this.attach(address);
+    this.attach(address);
   }
 
   attach(address: string) {
-    return new ethers.Contract(
+    this.contract = new ethers.Contract(
       address, 
       SupplyChainRootArtifact.abi, 
-      this.wallet.connect(new ethers.providers.FallbackProvider(this.providers))
+      this.wallet.connect(this.providers[0])
     ) as SupplyChainRoot;
   }
 

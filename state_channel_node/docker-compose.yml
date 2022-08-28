@@ -1,5 +1,11 @@
 version: "0.1"
 services:
+  oracle:
+    build:
+      context: .
+      dockerfile: ./contracts/Dockerfile
+    ports:
+      - "8545:8545"
   bulkbuyer:
     build: .
     ports:

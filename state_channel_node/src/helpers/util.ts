@@ -16,13 +16,7 @@ import RoutingInformation from '../classes/RoutingInformation';
 
 const getProvidersFromConfig = (contract : typeof leafhopper.contract) => {
   const providers = new Array<ethers.providers.Provider>();
-  if (contract.deployTo.rpc) {
-    providers.push(new ethers.providers.JsonRpcProvider(contract.deployTo.rpc));
-  } else if (contract.apikeys.etherscan) {
-    providers.push(new ethers.providers.EtherscanProvider(contract.deployTo.network, contract.apikeys.etherscan));
-  } else {
-    providers.push(ethers.providers.getDefaultProvider(contract.deployTo.network));
-  }
+  providers.push(new ethers.providers.JsonRpcProvider("http://oracle:8545"));
   return providers;
 }
 
@@ -62,13 +56,17 @@ const getParticipantsAddressFromConfig = (participants : typeof leafhopper.parti
   oracle: Oracle,
   requestServer: RequestServer
   ) => {
-  const router = express.Router();
   app.use(helmet());
   app.use(express.json());
-  app.use('/dispute', disputeRouter(router, conformance, oracle));
-  app.use('/begin', beginRouter(router, identity, conformance, routing, oracle, requestServer));
-  app.use('/step', stepRouter(router, identity, conformance, oracle));
-  app.use('/attach', startRouter(router, conformance, oracle));
+  app.use('/dispute', disputeRouter(conformance, oracle));
+  app.use('/step', stepRouter(identity, conformance, oracle));
+  app.use('/begin', beginRouter(identity, conformance, routing, oracle, requestServer));
+  app.use('/attach', startRouter(conformance, oracle));
+
+  app.get("/", (_, res, next) => {
+    res.sendStatus(200);
+    return next();
+  });
 
   app.use((error: Error, _: Request, response: Response, next: NextFunction) => {
     const message = error.message || 'Something went wrong';
@@ -78,10 +76,6 @@ const getParticipantsAddressFromConfig = (participants : typeof leafhopper.parti
       .send(message);
 
     return next();
-  });
-
-  app.get('/', (req: Request, res: Response) => {
-    res.sendStatus(200);
   });
 
   return app;

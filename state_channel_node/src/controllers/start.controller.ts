@@ -10,6 +10,7 @@ import Oracle from '../classes/Oracle';
  */
 const start = (conformance: ConformanceCheck, oracle: Oracle) => {
   return async (req: Request, res: Response, next: NextFunction) => {
+    console.log("Inside attach route: " + req.protocol + '://' + req.get('host') + req.originalUrl);
     const address = req.params.root;
     oracle.attach(address);
     conformance.reset();

@@ -13,9 +13,6 @@ const leafhopper = {
     deployTo: {
       network: 'localhost',
       rpc: 'http://127.0.0.1:8545'
-    },
-    apikeys: {
-      etherscan: "P9KCHUFR52IPJBB4RQCHWZXNCR3718VDS5"
     }
   },
   participants: [

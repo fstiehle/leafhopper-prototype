@@ -4,7 +4,8 @@ import Oracle from '../classes/Oracle';
 
 /* Handles the /dispute endpoint. It uses the Oracle class to trigger a dispute on the blockchain with the current tokenState. **/
 const dispute = (conformance: ConformanceCheck, oracle: Oracle) => {
-  return async (_: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    console.log("Inside dispute route: " + req.protocol + '://' + req.get('host') + req.originalUrl);
     if (!oracle.contract) {
       return next(new Error("No Contract installed.")); 
     }

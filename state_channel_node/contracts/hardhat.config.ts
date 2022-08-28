@@ -32,11 +32,6 @@ const config: HardhatUserConfig = {
       }
     }
   },
-  etherscan: {
-    // Your API key for Etherscan
-    // Obtain one at https://etherscan.io/
-    apiKey: leafhopper.contract.apikeys.etherscan
-  },
   paths: {
     sources: "./src"
   },

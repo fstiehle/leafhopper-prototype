@@ -40,7 +40,7 @@ Classes encapsulate information and functionality used by the controllers. We de
 - `RequestServer.ts`: Providing HTTPS functionality to be able to communicate with other participants.
 - `RoutingInformation.ts`: A class used by Routing.ts to encapsulate a participants' routing related information (e.g., hostname).
 
-### Controller
+## Controller
 
 A controller handles the incoming API requests as seen above. It uses aformentioned classes to perform their responsibilities as below.
 
@@ -50,3 +50,10 @@ A controller handles the incoming API requests as seen above. It uses aformentio
 - step.controller.ts: Receives transition proposals encoded as `Step` over the `/step` API. It verifies a proposal's conformance using the `Conformance` class; if verified it answers with a signed transition encoded as `Step`.
 
 # Scripts
+Each below script can be run by `npm run SCRIPT`. 
+ - `generate/keys`: Genereates the RSA keys required for the TLS connections between nodes.
+ -  `generate/traces`: Genereates test traces for the correctness benchmark.
+ -  `build`: Build the state channel node.
+ -  `start`: Run a node locally. Take the identity from the .env file.
+ -  `test`: Execute test files.
+ -  `benchmark/correctness`: Execute correctness benchmark based on the generated traces.

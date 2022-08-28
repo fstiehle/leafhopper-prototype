@@ -32,7 +32,7 @@ The project is built using node and the package manager yarn. For the correctnes
 > (Optionally) Run tests: In `leafhopper-prototype/state_channel_node` run `npm run test`
 11. Simulate the state channel network: In `leafhopper-prototype/state_channel_node/` run `docker compose up`.
 
-Nodes are now available on the localhost as specified in `leafhopper.config.ts`. By default from ports 8000 to 8004. The Ethereum node on port 8545.
+Participants' nodes are now available on the localhost as specified in `leafhopper.config.ts`. By default from ports 8000 to 8004. The Ethereum node on port 8545.
 
 
 ## Figures

@@ -5,6 +5,8 @@ It provides two main packages:
   - See [State Channel Node Documentation](https://github.com/fstiehle/leafhopper-prototype/tree/main/state_channel_node#readme).
 - A State Channel Root Contract contained in the folder `state_channel_node/contracts`. 
 
+> :warning: This repository includes .env files containing test mnemonics to ease the deployment of the prototype in a local environemnt. Do not re-use them!
+
 ## General Architecture
 The general architecture of Leafhopper is depicted in [Figures](https://github.com/fstiehle/leafhopper-prototype/new/main?readme=1#figures) below.
 We assume an external component such as a process aware information system (PAIS).

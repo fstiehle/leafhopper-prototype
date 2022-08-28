@@ -19,6 +19,22 @@ We assume an external component such as a process aware information system (PAIS
 
 ## Run it
 
+The project is built using node and the package manager yarn. For the correctness benchmark, additionally, Docker is required. Leafhopper has been developed with node version 18.4.0, which is also installed inside the Docker containers.
+
+1. Install node.js.
+2. Install yarn.
+3. Clone the repository. 
+4. In the node directory `leafhopper-prototype/state_channel_node` run `yarn install`.
+6. In the contracts directory `leafhopper-prototype/state_channel_node/contracts` run `yarn install`.
+7. Build the contracts: In `leafhopper-prototype/state_channel_node/contracts` run `npm run build`.
+9. Build the node: In `leafhopper-prototype/state_channel_node/` run `npm run build`.
+10. Generate the TLS keys: In `leafhopper-prototype/state_channel_node/` run `npm run generate/keys`.
+> (Optionally) Run tests: In `leafhopper-prototype/state_channel_node` run `npm run test`
+11. Simulate the state channel network: In `leafhopper-prototype/state_channel_node/` run `docker compose up`.
+
+Nodes are now available on the localhost as specified in `leafhopper.config.ts`. By default from ports 8000 to 8004. The Ethereum node on port 8545.
+
+
 ## Figures
 ### Leafhopper Main Components
 <img src="https://github.com/fstiehle/leafhopper-prototype/blob/74fdfe1f0a2260e42552701acafdac64014bed13/figures/architecture.svg" alt="Leafhopper Architecture" width="800"/>

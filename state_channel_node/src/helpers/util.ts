@@ -67,7 +67,7 @@ const getParticipantsAddressFromConfig = (participants : typeof leafhopper.parti
   app.use(express.json());
   app.use('/begin', beginRouter(router, identity, conformance, routing, oracle, requestServer));
   app.use('/step', stepRouter(router, identity, conformance, oracle));
-  //app.use('/dispute', disputeRouter(router, conformance, oracle));
+  app.use('/dispute', disputeRouter(router, conformance, oracle));
   app.use('/attach', startRouter(router, conformance, oracle));
 
   app.use((error: Error, _: Request, response: Response, next: NextFunction) => {

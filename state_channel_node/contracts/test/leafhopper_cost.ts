@@ -10,7 +10,7 @@ import Step from '../../src/classes/Step';
 
 const {deployContract} = waffle;
 
-const SAVE_TO_FILE = true;
+const SAVE_TO_FILE = false;
 
 describe('BENCHMARK COST: StateChannelRoot', () => {
   let participants: SignerWithAddress[];

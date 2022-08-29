@@ -4,7 +4,7 @@ import express from 'express';
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import https from 'https';
-import {ethers} from 'ethers';
+import {ethers, ContractFactory} from 'ethers';
 import { configureServer } from '../src/helpers/util';
 import Participant from '../src/classes/Participant';
 import RoutingInformation from '../src/classes/RoutingInformation';
@@ -15,6 +15,9 @@ import Oracle from '../src/classes/Oracle';
 import RequestServer from '../src/classes/RequestServer';
 import Step from '../src/classes/Step';
 const {expect} = chai;
+import SupplyChainRootArtifact from '../dist/contracts/artifacts/src/SupplyChainRoot.sol/SupplyChainRoot.json';
+import {SupplyChainRoot} from '../contracts/typechain/SupplyChainRoot';
+import leafhopper from '../leafhopper.config';
 
 // ignore certificate not signed for localhost
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = '0'; 
@@ -26,6 +29,9 @@ describe('/begin and /step', () => {
   let participants: Map<Participant, RoutingInformation>;
   let rootCA: string;
   let prevSteps: Step[];
+  let supplyChain: SupplyChainRoot;
+  let withContract = true;
+  const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545/")
 
   before(() => {
     participants = new Map<Participant, RoutingInformation>([
@@ -42,12 +48,41 @@ describe('/begin and /step', () => {
     }
   })
 
-  beforeEach(() => {
+  beforeEach(async () => {
     servers = new Map<Participant, Server>();
     keys = new Map<Participant, ethers.Wallet>();
-    const pubKeys = new Map<Participant, string>();
     prevSteps = new Array<Step>();
+      
+    const pubKeys = new Map<Participant, string>();
+    for (const participant of leafhopper.participants) {
+      const wallet = ethers.Wallet.fromMnemonic(participant.test_mnemonic);
+      keys.set(participant.id, wallet);
+      pubKeys.set(participant.id, wallet.address)
+    }
 
+    const factory = new ContractFactory(SupplyChainRootArtifact.abi, SupplyChainRootArtifact.bytecode)
+    .connect(keys.get(0).connect(provider))
+    try {
+      supplyChain = (await factory.deploy(
+          [
+            keys.get(0).address,
+            keys.get(1).address,
+            keys.get(2).address,
+            keys.get(3).address,
+            keys.get(4).address
+          ],
+          1209600
+        )) as SupplyChainRoot;
+    } catch (error) {
+      console.log('Could not deploy contract, test without it.', error);
+      withContract = false;
+    }
+
+    let receipt;
+    if (withContract) {
+      receipt = await supplyChain.deployTransaction.wait(1);
+    }
+    
     for (const [participant, routingInformation] of participants) {
       let sK, cert;
       try {
@@ -57,19 +92,15 @@ describe('/begin and /step', () => {
         console.error(err);
       }
 
-      const wallet = ethers.Wallet.createRandom();
-      keys.set(participant, wallet);
-      pubKeys.set(participant, wallet.address)
-
       const app = configureServer(
         express(), 
         {
           me: participant,
-          wallet: wallet
+          wallet: keys.get(participant)
         },
         new SupplyChainRouting(participants),
         new SupplyChainConformance(pubKeys),
-        new Oracle(null, wallet, [ethers.providers.getDefaultProvider()]),
+        new Oracle(receipt ? receipt.contractAddress: null, keys.get(participant), [provider]),
         new RequestServer(rootCA)
       );
 
@@ -224,5 +255,40 @@ describe('/begin and /step', () => {
       expect(err).to.be.null;
       console.log(err);
     });
+  });
+
+  it('test start of dispute phase', async () => {
+    if (!withContract) {
+      console.log("Did not test contract, please simulate a blockchain node locally and repeat.")
+      return true;
+    }
+    // Bulk Buyer to Manufacturer
+  
+    await chai.request('https://localhost:' + participants.get(Participant.BulkBuyer).port)
+      .post('/begin/0')
+      .ca(Buffer.from(rootCA))
+      .then(res => {
+        expect(res).to.have.status(200);
+        prevSteps.push(new Step(res.body.step));
+      })
+      .catch(err => {
+        console.log(err);
+        expect(err).to.be.null;
+     });
+
+     await chai.request('https://localhost:' + participants.get(Participant.BulkBuyer).port)
+      .post('/dispute')
+      .ca(Buffer.from(rootCA))
+      .then(res => {
+        expect(res).to.have.status(200);
+      })
+      .catch(err => {
+        console.log(err);
+        expect(err).to.be.null;
+     });
+
+    const dispute = await supplyChain.disputeMadeAtUNIX()
+    expect(dispute.toNumber(), 'is disputed?').to.be.not.eql(0);
+    
   });
 });

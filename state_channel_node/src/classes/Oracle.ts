@@ -36,18 +36,16 @@ export default class Oracle {
     return (0 !== dispute.toNumber());
   }
 
-  async dispute(step: Step): Promise<boolean> {
-    const tx = await this.contract.submit(step.getBlockchainFormat());
+  async dispute(): Promise<boolean> {
+    const tx = await this.contract.dispute();
     const receipt = await tx.wait(CONFIRMATION_BLOCKS);
-    console.log('BENCHMARK Gas used for dispute(): ', receipt.gasUsed.toString())
     if (receipt.events?.filter((x) => {return x.event === DISPUTE_EVENT}).length > 0) { return true }
     return false;
   }
 
-  async state(step: Step): Promise<boolean> {
+  async submit(step: Step): Promise<boolean> {
     const tx = await this.contract.submit(step.getBlockchainFormat());
     const receipt = await tx.wait(CONFIRMATION_BLOCKS);
-    console.log('BENCHMARK Gas used for step(): ', receipt.gasUsed.toString())
     return receipt.status !== 0;
   }
 }

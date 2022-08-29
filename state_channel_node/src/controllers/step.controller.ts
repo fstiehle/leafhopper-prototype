@@ -11,7 +11,6 @@ import SupplyChainConformance from '../classes/SupplyChainConformance';
  */
 const step = (identity: Identity, conformance: ConformanceCheck, oracle: Oracle) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    console.log("Inside step route: " + req.protocol + '://' + req.get('host') + req.originalUrl);
     // Check blockchain for possible dispute state
     if (oracle.contract && await oracle.isDisputed()) {
       console.log('Dispute is raised.');

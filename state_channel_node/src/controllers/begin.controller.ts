@@ -15,7 +15,6 @@ const begin = (
   requestServer: RequestServer
   ) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    console.log("Inside begin route: " + req.protocol + '://' + req.get('host') + req.originalUrl);
     const taskID = parseInt(req.params.id);
     console.log('begin', taskID);
     // Check blockchain for possible dispute state

@@ -2,7 +2,7 @@
 
 - [How to run it?](https://github.com/fstiehle/leafhopper-prototype#run-it) 
 
-The State Channel Node is a node.js server and holds the current state of the process and maintains a connection to each other state channel node in the network. It can receive requests from outside over the `/begin:taskid` route to advance the state of the process. The server can be deployed with different identities. Based on their identity they will be assigned a unique RSA key pair and blockchain address.
+The State Channel Node is a node.js server and holds the current state of the process and maintains a connection to each other state channel node in the network. It can receive requests from outside over the `/begin:taskid` route to instruct the node to propose the task with :taskid to the network. The server can be deployed with different identities. Based on their identity they will be assigned a unique RSA key pair and blockchain address.
 
 # API
 

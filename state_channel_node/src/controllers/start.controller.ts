@@ -3,10 +3,8 @@ import ConformanceCheck from '../classes/Conformance';
 import Oracle from '../classes/Oracle';
 
 /**
- * 
- * @param conformance 
- * @param oracle 
- * @returns 
+ * Handles the /attach:contractAddress API. Mainly to make benchmarking easier. 
+ * It alows to reset the state of a node and attach a new root contract with address contractAddress.
  */
 const start = (conformance: ConformanceCheck, oracle: Oracle) => {
   return async (req: Request, res: Response, next: NextFunction) => {

@@ -12,7 +12,7 @@ const leafhopper = {
     },
     deployTo: {
       network: 'localhost',
-      rpc: 'http://oracle:8545:8545'
+      rpc: 'http://oracle:8545'
     }
   },
   participants: [

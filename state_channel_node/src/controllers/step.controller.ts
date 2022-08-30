@@ -3,11 +3,11 @@ import Step from '../classes/Step';
 import ConformanceCheck from '../classes/Conformance';
 import Identity from '../classes/Identity';
 import Oracle from '../classes/Oracle';
-import SupplyChainConformance from '../classes/SupplyChainConformance';
 
 /**
- * Receives new token state from other participant and task to invoke 
- * Check if task to invoke leads to new token state that was sent
+ * Receives transition proposals encoded as Step over the /step API. 
+ * It verifies a proposal's conformance using the Conformance class; 
+ * if verified it answers with a signed transition encoded as Step.
  */
 const step = (identity: Identity, conformance: ConformanceCheck, oracle: Oracle) => {
   return async (req: Request, res: Response, next: NextFunction) => {

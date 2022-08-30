@@ -2,17 +2,17 @@ import dotenv from 'dotenv';
 dotenv.config({ path: __dirname + '/.env' });
 
 const leafhopper = {
-  identity: process.env.APP_IDENTITY!,
-  mnemonic: process.env.APP_MNEMONIC!,
+  identity: process.env.APP_IDENTITY,
+  mnemonic: process.env.APP_MNEMONIC,
 
   contract: {
-    address: process.env.APP_ADDRESS_CONTRACT!,
+    address: process.env.APP_ADDRESS_CONTRACT,
     deployFrom: {
-      mnemonic: process.env.APP_DEPLOY_MNEMONIC!,
+      mnemonic: process.env.APP_DEPLOY_MNEMONIC,
     },
     deployTo: {
       network: 'localhost',
-      rpc: 'http://127.0.0.1:8545'
+      rpc: 'http://oracle:8545:8545'
     }
   },
   participants: [

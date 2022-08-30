@@ -4,7 +4,6 @@ import chai from 'chai';
 import SupplyChainConformance from '../src/classes/SupplyChainConformance';
 import Participant from "../src/classes/Participant";
 import RoutingInformation from '../src/classes/RoutingInformation';
-import Step from "../src/classes/Step";
 import {ethers} from 'ethers';
 import traces from './traces/supplyChain.json'
 const {expect} = chai;
@@ -27,21 +26,6 @@ for (const [participant, _] of participants) {
 
 const getNewConformanceService = (participants: Map<Participant, string>) => {
   return new SupplyChainConformance(participants);
-}
-
-const getNewStep = async (
-  from: Participant,
-  conformance: SupplyChainConformance, 
-  taskID: number
-  ) => {
-  const step = new Step({
-    from,
-    taskID,
-    caseID: 0,
-    newTokenState: SupplyChainConformance.task(conformance.tokenState, taskID)
-  });
-  await step.sign(keys.get(from), from);
-  return step;
 }
 
 describe('Dry test conformance check functions', () => {

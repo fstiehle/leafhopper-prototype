@@ -7,6 +7,11 @@ import Oracle from '../classes/Oracle';
 import RequestServer from '../classes/RequestServer';
 import SupplyChainConformance from '../classes/SupplyChainConformance';
 
+/**
+ * Handles the /begin:taskid API. 
+ * It appends the submitted taskid to the current tokenState and sends a transition proposal 
+ * encoded as Step to the network using the Routing class.
+ */
 const begin = (
   identity: Identity,
   conformance: ConformanceCheck,
@@ -54,6 +59,7 @@ const begin = (
     await step.sign(identity.wallet, identity.me);
 
     // Broadcast
+    // eslint-disable-next-line
     const broadcast = new Array<Promise<any>>();
     for (const [participant, route] of routing.routing) { 
       if (participant === identity.me) continue; // Exclude myself from broadcast

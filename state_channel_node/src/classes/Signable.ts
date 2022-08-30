@@ -5,9 +5,11 @@ import Participant from './Participant';
 
 export interface SignablePart {
   types: string[];
+  // eslint-disable-next-line
   value: any[];
 }
 
+/* Provide crypographic signature functionality */
 export default abstract class Signable {
   salt = "";
   signature = new Array<string>();

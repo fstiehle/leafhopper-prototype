@@ -9,6 +9,7 @@ export interface StepPublicProperties {
   signature?: string[];
 }
 
+/* Step encodes all the information necessary for a transition, it is the main data type. */
 export default class Step extends Signable implements StepPublicProperties {
   from: number;
   caseID: number;
@@ -50,6 +51,7 @@ export default class Step extends Signable implements StepPublicProperties {
   }
 
   getSignablePart(withSignature = false) {
+    // eslint-disable-next-line
     const payload: any[] = [this.caseID, this.from, this.taskID, this.uintNewTokenState, this.salt];
     const types = ['uint', 'uint', 'uint', 'uint', 'bytes16'];
     if (withSignature) { 

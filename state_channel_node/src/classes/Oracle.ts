@@ -9,8 +9,8 @@ const DISPUTE_EVENT = 'DisputeSucessfullyRaised';
 
 type Provider = ethers.providers.Provider;
 
+/* Providing functionality to communicate with the root contract. */
 export default class Oracle {
-
   contract: SupplyChainRoot;
   wallet: Wallet;
   providers: Provider[];

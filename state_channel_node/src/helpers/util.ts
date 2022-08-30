@@ -16,7 +16,7 @@ import RoutingInformation from '../classes/RoutingInformation';
 
 const getProvidersFromConfig = (contract : typeof leafhopper.contract) => {
   const providers = new Array<ethers.providers.Provider>();
-  providers.push(new ethers.providers.JsonRpcProvider("http://oracle:8545"));
+  providers.push(new ethers.providers.JsonRpcProvider(contract.deployTo.rpc));
   return providers;
 }
 

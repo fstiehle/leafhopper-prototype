@@ -44,11 +44,6 @@ export default class SupplyChainConformance implements Conformance {
       return false;
     }
 
-    //console.log("Check previous steps and replay their effect");
-    // If a fault is encountered roll back from this state
-    const currentTokenState = this.tokenState;
-    const currentSteps = this.steps;
-
     // Check and replay step
     if (this.checkStep(step)) {
       this.steps[step.taskID] = step;
@@ -84,7 +79,7 @@ export default class SupplyChainConformance implements Conformance {
     }
 
     // is it actually from them? 
-    if (!step.verifySignature(this.pubKeys.get(step.from)!, step.signature[step.from])) {
+    if (!step.verifySignature(this.pubKeys.get(step.from), step.signature[step.from])) {
       return false;
     }
 

@@ -30,7 +30,7 @@ process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = '0';
     const replayer = new Replayer();
     const address = replayer.deployContract("stateChannel");
     await replayer.attach(address);
-    const errors = new Array<any>();
+    const errors = new Array<Error>();
     console.log(trace)
     for (const [_, v] of trace.entries()) {
       try {

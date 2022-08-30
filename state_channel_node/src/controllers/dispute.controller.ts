@@ -1,11 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import { setgroups } from 'node:process';
 import ConformanceCheck from '../classes/Conformance';
 import Oracle from '../classes/Oracle';
 
 /* Handles the /dispute endpoint. It uses the Oracle class to trigger a dispute on the blockchain with the current tokenState. **/
 const dispute = (conformance: ConformanceCheck, oracle: Oracle) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (_: Request, res: Response, next: NextFunction) => {
     if (!oracle.contract) {
       return next(new Error("No Contract installed.")); 
     }

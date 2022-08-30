@@ -3,7 +3,6 @@ import fs from 'fs';
 import https from 'https';
 import express, { Express } from 'express';
 import SupplyChainConformance from './classes/SupplyChainConformance';
-import Participant from "./classes/Participant";
 import SupplyChainRouting from './classes/SupplyChainRouting';
 import { 
   configureServer, 

@@ -15,7 +15,7 @@ import Oracle from '../src/classes/Oracle';
 import RequestServer from '../src/classes/RequestServer';
 import Step from '../src/classes/Step';
 const {expect} = chai;
-import SupplyChainRootArtifact from '../dist/contracts/artifacts/src/SupplyChainRoot.sol/SupplyChainRoot.json';
+import SupplyChainRootArtifact from '../contracts/artifacts/src/SupplyChainRoot.sol/SupplyChainRoot.json';
 import {SupplyChainRoot} from '../contracts/typechain/SupplyChainRoot';
 import leafhopper from '../leafhopper.config';
 
@@ -196,7 +196,6 @@ describe('/begin and /step', () => {
 
   it('test with non-conforming behaviour', async () => {
     // Bulk Buyer to Manufacturer
-    let prevStep;
     await chai.request('https://localhost:' + participants.get(Participant.BulkBuyer).port)
       .post('/begin/0')
       .ca(Buffer.from(rootCA))

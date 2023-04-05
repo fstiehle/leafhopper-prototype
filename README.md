@@ -1,3 +1,5 @@
+:warning: __Leafhopper is now available [here!](https://github.com/fstiehle/leafhopper)__
+
 # Leafhopper
 Leafhopper is a prototype that runs a BPMN choreography in a state channel network. Leafhopper implements the supply chain use case as in [Figures](https://github.com/fstiehle/leafhopper-prototype/new/main?readme=1#figures) below.
 It provides two main packages:
